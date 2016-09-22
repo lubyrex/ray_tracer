@@ -1,0 +1,58 @@
+﻿                  <meta charset="utf-8">
+                  Lab 1-Meshes
+                 **Development Journal**
+                    Matheus de Carvalho Souza
+2016-09-18: `cube.off`
+============================================================
+time budgetted: 0.25
+time taken: 0.75
+Bugs encountered: Only half of each of the cube faces would be correctly generated. The other half was "folded" diagonally on top of the correct half. How I solved it: fixed the winding order. 
+
+2016-09-18: `makeCylinder.off`
+============================================================
+time budgetted: 
+time taken: 7:40 - 10:50 
+**********************************************************************
+* Cylinder top and bottom indices         Cylinder side indices      * 
+*          ...         ...                                           *
+*            *---------*                        1_t    (i_t+1)%(n-1) *
+*           /           \                        *-------*           *
+*          /             \                       |      /|           *
+*         /               \                      |     / |           *
+*(i+n-1) *                 *(i+2)%m            y |    /  |           *
+*  %m     \               /                      |   /   |           *
+*          \             /                       |  /    |           *
+*           \           /                        | /     |           *
+*            *---------* (i+1)%m                 |/      |           * 
+*           1%x                                  *-------*           *
+*               m = n-1                         1_b    (i_b+1)%(n-1) *
+**********************************************************************
+bugs encountered: 
+    how to fix it: make sure widing is right, and we mod by the right number. 
+   
+ ![Cylinder-First Attempt](cylinder-firstAttempt.jpg)
+
+![Cylinder-top and bottom](cylinder-topBottom.jpg)
+
+![Cylinder- no Base](cylinder-nobase.jpg)
+
+![Cylinder-Buggy radius](cylinder-buggyRadius2.jpg)
+
+![Cylinder-side view](goodcylinder-wireframe.jpg)
+
+![Cylinder-top](cylinder-top.jpg)
+
+![Cylinder-bottom](cylinder-base.jpg)
+
+
+
+![Heightfield](Heightfield-wireframe.jpg)
+2016-09-18: Time Log
+============================================================
+Reading of documentation and preparation 
+12:00 -> 13:40 ... 15:30 -> 16:00 
+
+
+
+<!-- Markdeep: -->
+<style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace;}</style><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>

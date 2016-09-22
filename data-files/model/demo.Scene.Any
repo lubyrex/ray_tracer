@@ -1,0 +1,264 @@
+// -*- c++ -*-
+{
+    name = "Demo";
+    models = {
+        centerModel = ArticulatedModel::Specification {
+            filename="model/cylinder.off";
+            preprocess = {
+                setMaterial("model/crate/blackMarble.jpg", 
+                    UniversalMaterial::Specification {
+                        glossy = Color4(Color3(0.04), 0.9);
+                    });
+            };
+        };
+
+        hfModel = ArticulatedModel::Specification {
+            filename="model/heightfield.off";
+            preprocess = {
+                setMaterial("model/crate/blackMarble.jpg", 
+                    UniversalMaterial::Specification {
+                        glossy = Color4(Color3(0.04), 0.9);
+                    });
+            };
+        };
+
+        stepModel = ArticulatedModel::Specification {
+            filename = "model/crate/crate.obj";
+            preprocess = {
+                setMaterial(all(),"model/crate/blackMarble.jpg");
+                transformGeometry(all(), Matrix4::scale(2.5,0.4,1.2));
+                transformCFrame(root(), Vector3(3, 0, 0 ) );
+            };
+        };
+    };
+
+    entities = {
+        cyl= VisibleEntity{
+        model = "centerModel";
+        CFrame::fromXYZYPRDegrees(0, 0.0, 0, 0, 0, 0);
+    };
+
+        ground = VisibleEntity {
+            model= "hfModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 0.0, 0, 0, 0, 0);
+        };
+        skybox = Skybox {
+            texture = "cubemap/noonclouds/noonclouds_*.png";
+        };
+
+    sun = Light {
+        bulbPower = Power3(2e6,1.7e6,1.4e6);
+        shadowMapBias = 0.5;
+        track = lookAt(Point3(-90, 200, 40), Point3(0, 0, 0));
+        shadowMapSize = Vector2int16(4096, 4096);
+        shadowMapBias = 0.02;
+        spotHalfAngleDegrees = 10;
+        spotSquare = true;
+        type = "SPOT";
+    };
+
+        camera = Camera {
+            frame = CFrame::fromXYZYPRDegrees(0, 6, 18);
+        };
+
+step0 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 0.0, 0, 0, 0, 0);
+         };
+step1 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 0.2, 0, 15, 0, 0);
+         };
+step2 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 0.4, 0, 30, 0, 0);
+         };
+step3 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 0.6, 0, 45, 0, 0);
+         };
+step4 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 0.8, 0, 60, 0, 0);
+         };
+step5 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 1.0, 0, 75, 0, 0);
+         };
+step6 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 1.2, 0, 90, 0, 0);
+         };
+step7 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 1.4, 0, 105, 0, 0);
+         };
+step8 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 1.6, 0, 120, 0, 0);
+         };
+step9 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 1.8, 0, 135, 0, 0);
+         };
+step10 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 2.0, 0, 150, 0, 0);
+         };
+step11 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 2.2, 0, 165, 0, 0);
+         };
+step12 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 2.4, 0, 180, 0, 0);
+         };
+step13 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 2.6, 0, 195, 0, 0);
+         };
+step14 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 2.8, 0, 210, 0, 0);
+         };
+step15 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 3.0, 0, 225, 0, 0);
+         };
+step16 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 3.2, 0, 240, 0, 0);
+         };
+step17 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 3.4, 0, 255, 0, 0);
+         };
+step18 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 3.6, 0, 270, 0, 0);
+         };
+step19 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 3.8, 0, 285, 0, 0);
+         };
+step20 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 4.0, 0, 300, 0, 0);
+         };
+step21 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 4.2, 0, 315, 0, 0);
+         };
+step22 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 4.4, 0, 330, 0, 0);
+         };
+step23 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 4.6, 0, 345, 0, 0);
+         };
+step24 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 4.8, 0, 0, 0, 0);
+         };
+step25 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 5.0, 0, 15, 0, 0);
+         };
+step26 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 5.2, 0, 30, 0, 0);
+         };
+step27 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 5.4, 0, 45, 0, 0);
+         };
+step28 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 5.6, 0, 60, 0, 0);
+         };
+step29 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 5.8, 0, 75, 0, 0);
+         };
+step30 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 6.0, 0, 90, 0, 0);
+         };
+step31 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 6.2, 0, 105, 0, 0);
+         };
+step32 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 6.4, 0, 120, 0, 0);
+         };
+step33 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 6.6, 0, 135, 0, 0);
+         };
+step34 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 6.8, 0, 150, 0, 0);
+         };
+step35 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 7.0, 0, 165, 0, 0);
+         };
+step36 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 7.2, 0, 180, 0, 0);
+         };
+step37 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 7.4, 0, 195, 0, 0);
+         };
+step38 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 7.6, 0, 210, 0, 0);
+         };
+step39 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 7.8, 0, 225, 0, 0);
+         };
+step40 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 8.0, 0, 240, 0, 0);
+         };
+step41 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 8.2, 0, 255, 0, 0);
+         };
+step42 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 8.4, 0, 270, 0, 0);
+         };
+step43 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 8.6, 0, 285, 0, 0);
+         };
+step44 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 8.8, 0, 300, 0, 0);
+         };
+step45 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 9.0, 0, 315, 0, 0);
+         };
+step46 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 9.2, 0, 330, 0, 0);
+         };
+step47 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 9.4, 0, 345, 0, 0);
+         };
+step48 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 9.6, 0, 0, 0, 0);
+         };
+step49 = VisibleEntity {
+            model = "stepModel";
+            frame = CFrame::fromXYZYPRDegrees(0, 9.8, 0, 15, 0, 0);
+         };};
+};

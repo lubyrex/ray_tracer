@@ -1,0 +1,129 @@
+﻿                  <meta charset="utf-8">
+                      
+                       **Report**
+                        Lab 2-Rays
+               Matheus de Carvalho Souza  +  Youle Chen 
+               mc13@williams.edu           
+               yc2@williams.edu                  
+                      
+Rendering Algorithms
+=======================================================
+`makeCylinder` vertices:
+
+makeCylinder:                                                           
+    top/bottom vertices:    
+                                            
+       for(i = 0; i < n-1; ++i){    
+                                    
+                 angle = $\frac{2*\pi*r}{n}*i$  
+                        
+                coordinates(x,y,z) = (sin(angle)r, cylHeight/2 or -cylHeight/2, cos(angle)r)
+
+       }                                                                
+
+Number of vertices= 2n. Number of faces = 3n-4. n = number of sides of top polygon. Top/bottom faces are triangular, side faces quadrilateral. 
+
+`makeCylinder` Vertex indices: 
+**********************************************************************
+* Cylinder top and bottom indices         Cylinder side indices      * 
+*          ...         ...                                           *
+*            *---------*                        1_t    (i_t+1)%(n-1) *
+*           /           \                        *-------*           *
+*          /             \                       |      /|           *
+*         /               \                      |     / |           *
+*(i+n-1) *                 *(i+2)%m            y |    /  |           *
+*  %m     \               /                      |   /   |           *
+*          \             /                       |  /    |           *
+*           \           /                        | /     |           *
+*            *---------* (i+1)%m                 |/      |           * 
+*           1%x                                  *-------*           *
+*               m = n-1                         1_b    (i_b+1)%(n-1) *
+**********************************************************************
+
+Heightfield:
+    x and z coordinates correspond to width and height values, scaled by the GUI specification. Accomplished through nested for loops. number of Vertices = $Image->height*Image->width$ number of faces = $(Image->height-1)*(Image->width-1)$
+
+Results
+=======================================================
+1. G3D Triangle:
+
+    ![]()
+
+2. G3D Cornell Box:
+
+    ![]()
+
+3. Analytic spheres + triangles:
+
+    ![]()
+
+4. 2048 G3D Cornell Box:
+
+    ![]()
+
+5. G3D Sponza (Report rendering time):
+
+    ![]()
+
+6. Custom Scene:
+
+    ![]()
+
+Running time analysis
+=======================================================
+1. Number of cores (1 vs [G3D::System::numCores](http://g3d.cs.williams.edu/g3d/G3D10/build/manual/class_g3_d_1_1_system.html#a4acba57a7c4353b59622dd6225f8e509))
+
+2. Number of triangels (use heightfield to vary the number of triangles)
+
+3. Number of pixels
+
+4. Number of lights
+
+5. Number of indirect rays 
+
+
+Asymptotic bound
+=======================================================
+
+Questions
+=======================================================
+1. How would you derive an analytic intersection algorithm for a finite right cylinder? Do not actually do so.
+
+2. How would compute the intersection with a surface for which there was no analytic intersection solution. For example, an arbitrary continuous height function y(x,z)y(x,z). Sketch an algorithm, but do not attempt to refine it.
+
+3. How do you think a binary tree could be leveraged to accelerate the ray intersection process? If you choose to research this (not required) before answering, be sure to cite the resources that you consult.
+
+Self-evaluation
+=======================================================
+(placeholder)
+
+
+Reflection
+=======================================================
+
+Workflow
+=======================================================
+The project took me 9.14h of required work, and 0.5 hours of additional work.
+N/A -> ran out of time. 
+ Task                 | Description                                                |Planned Time(h)| Actual Time
+ ---------------------|------------------------------------------------------------|--------------:|------------:
+ Report Draft         | Formatted Markdeep document with placeholder text.         |     0.50      | 0.50
+ GUI MVP    	      |	Copy code from Meshes and add extra specifications link to function |  0.25    | 
+ rendering time computation Draft| time finished - time started                    |     0.17      | 0.25
+ Image rendering Draft| skeleteon of procedure, loops, forks, ad helper functions linked to the GUI|     0.75      | 
+ `makeCylinder` MVP   | `for` loops generating all correct vertices and possibly-buggy faces. |  0.25      | 4.0
+ `glass.off`MVP       | Write silhouette and run possibly-buggy revolution         |     0.75     |  N/A
+ `heightfield.off` MVP| Possibly-buggy, but visible heightfield, responsive to parameters|    0.75    |    1.5
+Report MVP           | Probably-correct answers and quick screenshots.            |     0.50      | 0.66
+ `makeCylinder` Polish| 100% correct and add GUI for number of slices.             |     0.25      |  1.0
+ `glass.off` Polish   | 100% correct and tied to GUI for number of slices.         |     0.50      | N/A
+ `heightfield.off` Polish|100% correct                                            |     0.50      |  0.08
+`demo.Scene.Any` MVP |	Wine glass on top of cylindric stand next to heightfield napkin |    0.75     | 
+ Report Polish        | Make sure answers are correct and everything is looking good |     0.50     |  N/A
+ `demo.Scene.Any` Polish | Moking sure everything is looking good                  |     0.50      |  N/A
+                                                          
+ [Table [tbl:workflow]: project planning table.]
+
+
+<!-- Markdeep: -->
+<style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace;}</style><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
