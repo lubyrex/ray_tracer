@@ -49,11 +49,12 @@ int main(int argc, const char* argv[]) {
 App::App(const GApp::Settings& settings) : GApp(settings) {
 }
 
-float cylR(1.0f);
+/*float cylR(1.0f);
 float cylH(2.0f); 
 int XZScale(1);
 float yScale(1);
 String hfSource = "C:/Users/cs371/Desktop/cs371/1-meshes/journal/test.png";
+*/
 // Called before the application loop begins.  Load data here and
 // not in the constructor so that common exceptions will be
 // automatically caught.
@@ -88,6 +89,7 @@ void App::onInit() {
         );
 }
 
+void App::onRender(){};
 
 void App::makeGUI() {
     // Initialize the developer HUD
