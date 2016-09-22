@@ -1,56 +1,99 @@
 ﻿                  <meta charset="utf-8">
-                  Lab 1-Meshes
-                 **Development Journal**
-                    Matheus de Carvalho Souza
-2016-09-18: `cube.off`
-============================================================
-time budgetted: 0.25
-time taken: 0.75
-Bugs encountered: Only half of each of the cube faces would be correctly generated. The other half was "folded" diagonally on top of the correct half. How I solved it: fixed the winding order. 
+                                <meta charset="utf-8">
+                       **Development Journal**
+                        Lab 2-Rays
+               Matheus de Carvalho Souza  +  Youle Chen 
+               mc13@williams.edu           
+               yc2@williams.edu   
 
-2016-09-18: `makeCylinder.off`
-============================================================
-time budgetted: 
-time taken: 7:40 - 10:50 
-**********************************************************************
-* Cylinder top and bottom indices         Cylinder side indices      * 
-*          ...         ...                                           *
-*            *---------*                        1_t    (i_t+1)%(n-1) *
-*           /           \                        *-------*           *
-*          /             \                       |      /|           *
-*         /               \                      |     / |           *
-*(i+n-1) *                 *(i+2)%m            y |    /  |           *
-*  %m     \               /                      |   /   |           *
-*          \             /                       |  /    |           *
-*           \           /                        | /     |           *
-*            *---------* (i+1)%m                 |/      |           * 
-*           1%x                                  *-------*           *
-*               m = n-1                         1_b    (i_b+1)%(n-1) *
-**********************************************************************
-bugs encountered: 
-    how to fix it: make sure widing is right, and we mod by the right number. 
-   
- ![Cylinder-First Attempt](cylinder-firstAttempt.jpg)
+2016-09-21: Advice
+=====================================================================
+- Work evenly divided in 4 parts:
+    1. GUI;
+    2. Ray tracing loop and post-processing the image;
+    3. The actual ray tracing; 
+    4. the ray-primitive intersection routines.
 
-![Cylinder-top and bottom](cylinder-topBottom.jpg)
+- Ray tracing algorithm takes only a few lines to implement. Design it well
 
-![Cylinder- no Base](cylinder-nobase.jpg)
+- Allocate time evenly across the 4 parts, and budget debugging, svn, documentation, and final report time
 
-![Cylinder-Buggy radius](cylinder-buggyRadius2.jpg)
+- It takes a long time to render images:
+    1. Debug using small images and simple scenes;
+    2. Anticipate rendering time and plan ahead.
 
-![Cylinder-side view](goodcylinder-wireframe.jpg)
+- Main bugs encountered: poorly chosen epsilon values, missing negations on directions. Break points and assertions to question my assumptions about the code. 
 
-![Cylinder-top](cylinder-top.jpg)
+2016-09-21: Procedures and helpers
+======================================================================
+1. GUI setup
+    - GApp::drawMessage to show the Rendering message. 
+    - G3D::Stopwatch for computing rendering time. 
+    - (helper) Fetching the resolution from GUI: Vector2int32 App::resolution() const, using G3D::TextInput to parse the selected value in the G3D::GuiDropDownList
 
-![Cylinder-bottom](cylinder-base.jpg)
+2. Render setup
+    App::onRender callback function to: 
+    - Determine the rendering options; 
+    - Create the output G3D::Image; 
+    - Pose the scene (with GApp::onPose) to extract the G3D::Surfaces (ignored the Surface2Ds produced); 
+    - Create an instace of RayTracer and set the scene from GApp::scene;
+    - Launch rendering on RayTracer eith the image and GApp::activeCamera, using G3D::Stopwatch for timing;
+    - Convert the image to a G3D::Texture and post-process the image with G3D::Film;
+    - Display image on screen.
 
+    Look into the post-processing code from the cpuRealTimeRayTrace project
 
+3. Ray generation 
+    - Ray inersection and ray tracing algorithms into a RayTracer class. RayTracer separates setting the scene from the actual rendering, and contains a large number of small helper routines.
+    - Core internal data structures was a G2D::TriTree, used as an array via operator[] overload. 
+    - G3D::Scene::onPose and G3D::TriTree::setcontents. Extract all lights from the scene into an array.
+    - RayTracer::Options class abstraction (adding fixed primitives, multithreading, etc.)
 
-![Heightfield](Heightfield-wireframe.jpg)
-2016-09-18: Time Log
-============================================================
-Reading of documentation and preparation 
-12:00 -> 13:40 ... 15:30 -> 16:00 
+    Single threaded ray tracer example:
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ c++
+    for (Point2int32 point; point.y < height; ++point.y) {
+        for (point.x = 0; point.x < width; ++point.x) {
+    	    ...
+        }
+    }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    nice properties: the iteration variable is a 2D point ready for use in the body. loop iterates most tightly along the horizontal axis, which is how images are usually stored on the GPU. This gives good cache coherence and grouping tightly in space (in either x or y) gices good branch coherence.
+
+    Multithreaded ray tracer example: Thread::runConcurrently to launcha 2D block:
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ c++
+    Thread::runConcurrently(Point2int32(0, 0), Point2int32(image->width(), image->height()), ...);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    more efficient than explicitly creating individual threads because runConcurrently optimizes for memory locality and performs load-balancing across processors. You'll need a std::function for the ... portion. I used a C++ lambda expression.
+
+4. Intersection
+    - First implemnent sphere primitive intersection, and then once working, implement triangles. 
+    - If an intersection exists, construct a surfel and return it to the **shading portion** of the algorithm
+    - Need to set the geometricNormal and shadingNormal to the same value: the normal to the sphere at the intersection point, and to set the position of the intersection. (ignore other properties).
+    - Keep current-closest intersection distant and surfel vaules, updated when a closer intersection to the camera is found. 
+    - G3D::TriTree ->  rray of triangle indices and materials. stores a binary tree internally. TriTree also stores a vertex position array to complete the indexed-triangle mesh data structure.
+    - Sampling from intersection: G3D::TriTree:sample is the simplest if a TriTree::Hit is constructed for the closest intersection.
+    - If the dot product of the ray direction and the counter-clockwise normal is positive, then the ray actually struck the triangle from behind. Set the G3D::TriTree::Hit::backface flag to true in this case. That tells G3D::TriTree::sample to flip the normal direction to be the one facing the ray when sampling materials and geometry for shading.
+    - Alpha testing: once you've sampled a triangle, check the coverage value in the surfel. If it is less than 1.0, ignore the intersection and allow the ray to continue.
+
+5. Precision issues
+    - Ray::minDistance for bumping the ray away from the origin. For indirect light rays at glancing angles (**`line-of-sight`** helper), it is often necessary to push the ray not just out from the origin point but specifically away from the surface.
+    - The normal is the known direction away from the surface, so shifting ray origins by a small epsilon times the (geometric) surface normal is a common practice. The G3D::Ray::bumpedRay can do this for you.
+
+6. Shading
+    - ~20 lines of code, mostly branches and loops
+    - use [`G3D::Surfel::finiteScatteringDensity`](http://g3d.cs.williams.edu/g3d/G3D10/build/manual/class_g3_d_1_1_surfel.html#aa0fb097d5a3527a00411940efb7e67b9) to evaluate $ f_X(\wi, \wo) $, and [`G3D::Light::biradiance`](http://g3d.cs.williams.edu/g3d/G3D10/build/manual/class_g3_d_1_1_light.html#ac4d2f32e4082e7a4980bc05bb52f18d0) to compute the _unshadowed_ biradiance $ \beta(X, y) $.
+    - trick for finding the direction from finite point $X$ to potentially-infinite homogeneous point $Y$:
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ c++
+      const Vector3& omega = (Y.xyz() - X * Y.w).direction();
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    -  in the mathematical notation of rendering, all vectors point _away_ from the point being shaded. You'll often have to negate ray directions and such to maintain consistency with the typeset mathematics.
+    - To compute outgoing radiance from the "ambient" incoming constant, use:
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ c++
+         L_o += surfel->reflectivity(Random::threadCommon()) * 0.05f;
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    - Render image first without shading, with radiance being equal to the surfel's lambertianReflectivity, then compute direct lightning, then shadows, then indirect lightning, which should take 3 lines
+
+<style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace;}</style><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
 
 
 

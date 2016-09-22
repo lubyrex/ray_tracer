@@ -8,43 +8,33 @@
                       
 Rendering Algorithms
 =======================================================
-`makeCylinder` vertices:
+- Important Design decisions: 
+- Observations:
+- "Gotchas":
 
-makeCylinder:                                                           
-    top/bottom vertices:    
-                                            
-       for(i = 0; i < n-1; ++i){    
-                                    
-                 angle = $\frac{2*\pi*r}{n}*i$  
-                        
-                coordinates(x,y,z) = (sin(angle)r, cylHeight/2 or -cylHeight/2, cos(angle)r)
+The reflected radiance at $X$ due to a single, unshadowed point light at $Y$ is given by:
 
-       }                                                                
+ \begin{equation} \Lo(X, \wo) = \beta(X, Y) \cdot f_X(\wi, \wo) \cdot |\wi \cdot \n| \end{equation}
 
-Number of vertices= 2n. Number of faces = 3n-4. n = number of sides of top polygon. Top/bottom faces are triangular, side faces quadrilateral. 
+where $\beta$ is the biradiance function of the light, $f_X$ is the bidirectional scattering
+distribution function of the surface at $X$, $\wi$ is the unit vector from $X$ towards $Y$, $\wo$
+is the outgoing direction, and $\n$ is the normal to the surface at $X$.
 
-`makeCylinder` Vertex indices: 
-**********************************************************************
-* Cylinder top and bottom indices         Cylinder side indices      * 
-*          ...         ...                                           *
-*            *---------*                        1_t    (i_t+1)%(n-1) *
-*           /           \                        *-------*           *
-*          /             \                       |      /|           *
-*         /               \                      |     / |           *
-*(i+n-1) *                 *(i+2)%m            y |    /  |           *
-*  %m     \               /                      |   /   |           *
-*          \             /                       |  /    |           *
-*           \           /                        | /     |           *
-*            *---------* (i+1)%m                 |/      |           * 
-*           1%x                                  *-------*           *
-*               m = n-1                         1_b    (i_b+1)%(n-1) *
-**********************************************************************
+The indirect radiance term is one more iteration of the rendering equation's integral equation
+(for nontransmissive surfaces). The total indirect contribution from one indirect scattering
+event is therefore:
 
-Heightfield:
-    x and z coordinates correspond to width and height values, scaled by the GUI specification. Accomplished through nested for loops. number of Vertices = $Image->height*Image->width$ number of faces = $(Image->height-1)*(Image->width-1)$
+\begin{equation}
+L_\mathrm{reflected~indirect}(X, \wo) = \int_{\mathbf{S}^2_+} \Li^1(X, \wi) \cdot f_X(\wi,\wo) \cdot |\wi \cdot \n| ~ d\wi
+\label{eqn:indirect}
+\end{equation}
+
+where $\Li^1$ is the "one bounce" (i.e., nonrecursive) incident light function.
 
 Results
 =======================================================
+(by rendering with ray tracer at 640x400 resolution, and saving to lossless png file)
+
 1. G3D Triangle:
 
     ![]()
@@ -71,9 +61,10 @@ Results
 
 Running time analysis
 =======================================================
+Measure and graph the running time of the program with respect to the following, ensuring other parameters are sufficiently large to ensure low variance.
 1. Number of cores (1 vs [G3D::System::numCores](http://g3d.cs.williams.edu/g3d/G3D10/build/manual/class_g3_d_1_1_system.html#a4acba57a7c4353b59622dd6225f8e509))
 
-2. Number of triangels (use heightfield to vary the number of triangles)
+2. Number of triangles (use heightfield to vary the number of triangles)
 
 3. Number of pixels
 
@@ -100,27 +91,25 @@ Self-evaluation
 
 Reflection
 =======================================================
+(placeholder)
 
 Workflow
 =======================================================
-The project took me 9.14h of required work, and 0.5 hours of additional work.
-N/A -> ran out of time. 
  Task                 | Description                                                |Planned Time(h)| Actual Time
  ---------------------|------------------------------------------------------------|--------------:|------------:
  Report Draft         | Formatted Markdeep document with placeholder text.         |     0.50      | 0.50
  GUI MVP    	      |	Copy code from Meshes and add extra specifications link to function |  0.25    | 
- rendering time computation Draft| time finished - time started                    |     0.17      | 0.25
- Image rendering Draft| skeleteon of procedure, loops, forks, ad helper functions linked to the GUI|     0.75      | 
- `makeCylinder` MVP   | `for` loops generating all correct vertices and possibly-buggy faces. |  0.25      | 4.0
- `glass.off`MVP       | Write silhouette and run possibly-buggy revolution         |     0.75     |  N/A
- `heightfield.off` MVP| Possibly-buggy, but visible heightfield, responsive to parameters|    0.75    |    1.5
-Report MVP           | Probably-correct answers and quick screenshots.            |     0.50      | 0.66
- `makeCylinder` Polish| 100% correct and add GUI for number of slices.             |     0.25      |  1.0
- `glass.off` Polish   | 100% correct and tied to GUI for number of slices.         |     0.50      | N/A
- `heightfield.off` Polish|100% correct                                            |     0.50      |  0.08
-`demo.Scene.Any` MVP |	Wine glass on top of cylindric stand next to heightfield napkin |    0.75     | 
- Report Polish        | Make sure answers are correct and everything is looking good |     0.50     |  N/A
- `demo.Scene.Any` Polish | Moking sure everything is looking good                  |     0.50      |  N/A
+ `App::onRender` Draft| skeleteon of procedure, loops, forks, and helper functions linked to the GUI|     0.75      | 
+ RayTracer Draft      | Header of class and all it's member functions               |      0.50     |
+ Ray intersect Draft  | rough lines of algorithm implementation                     |      0.50     |
+ Shading Draft        | Procedure's structure, including inputs and outlining comments|     0.75     | 
+ Indirect Rays Draft  | Algorithm's structure and outlining comments                |    0.50       |   
+ Ray intersect MVP    | working for all primitives, successfully bumping rays       |      0.50     |
+ Shading MVP          | Algorithms working                                          |     0.75     | 
+ Indirect Rays MVP    | Algorithms working                                          |    0.50      |    
+ RayTracer MVP        | cpp implementation generally working, consistent relationship b/w member functions|      0.75     |
+ `App::onRender` MVP  | procedures working preliminarily, maybe with some bugs      |     1         | 
+ Report MVP           | questions reasoned through and answered                     |     0.50      |
                                                           
  [Table [tbl:workflow]: project planning table.]
 
