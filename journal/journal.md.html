@@ -50,19 +50,19 @@
     - RayTracer::Options class abstraction (adding fixed primitives, multithreading, etc.)
 
     Single threaded ray tracer example:
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ c++
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     for (Point2int32 point; point.y < height; ++point.y) {
         for (point.x = 0; point.x < width; ++point.x) {
     	    ...
         }
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     nice properties: the iteration variable is a 2D point ready for use in the body. loop iterates most tightly along the horizontal axis, which is how images are usually stored on the GPU. This gives good cache coherence and grouping tightly in space (in either x or y) gices good branch coherence.
 
     Multithreaded ray tracer example: Thread::runConcurrently to launcha 2D block:
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ c++
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     Thread::runConcurrently(Point2int32(0, 0), Point2int32(image->width(), image->height()), ...);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     more efficient than explicitly creating individual threads because runConcurrently optimizes for memory locality and performs load-balancing across processors. You'll need a std::function for the ... portion. I used a C++ lambda expression.
 
 4. Intersection
@@ -83,14 +83,14 @@
     - ~20 lines of code, mostly branches and loops
     - use [`G3D::Surfel::finiteScatteringDensity`](http://g3d.cs.williams.edu/g3d/G3D10/build/manual/class_g3_d_1_1_surfel.html#aa0fb097d5a3527a00411940efb7e67b9) to evaluate $ f_X(\wi, \wo) $, and [`G3D::Light::biradiance`](http://g3d.cs.williams.edu/g3d/G3D10/build/manual/class_g3_d_1_1_light.html#ac4d2f32e4082e7a4980bc05bb52f18d0) to compute the _unshadowed_ biradiance $ \beta(X, y) $.
     - trick for finding the direction from finite point $X$ to potentially-infinite homogeneous point $Y$:
-      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ c++
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
       const Vector3& omega = (Y.xyz() - X * Y.w).direction();
-      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     -  in the mathematical notation of rendering, all vectors point _away_ from the point being shaded. You'll often have to negate ray directions and such to maintain consistency with the typeset mathematics.
     - To compute outgoing radiance from the "ambient" incoming constant, use:
-         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ c++
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
          L_o += surfel->reflectivity(Random::threadCommon()) * 0.05f;
-         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     - Render image first without shading, with radiance being equal to the surfel's lambertianReflectivity, then compute direct lightning, then shadows, then indirect lightning, which should take 3 lines
 
 <style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace;}</style><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
