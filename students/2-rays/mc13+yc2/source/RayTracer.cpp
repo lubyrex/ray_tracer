@@ -1,5 +1,6 @@
 /** \file RayTracer.cpp */
 #include "RayTracer.h"
+#include "Math.h"
 
 RayTracer::RayTracer(const shared_ptr<Scene>& s):
     scene(s){};
@@ -52,7 +53,22 @@ shared_ptr<Surfel> RayTracer::intersectTriangle(const Tri& triangle, const Ray& 
 };
 
 shared_ptr<Surfel> RayTracer::intersectSphere(const Sphere& sphere, const Ray& ray, const Color3& color ) const{
-      return nullptr;
+    Vector3 w(ray.direction());
+    Point3 P(ray.origin());
+    Point3 C(sphere.center);
+    float r(sphere.radius);
+    float b = 2.0*w.dot(P-C);
+    float c = (P-C).dot(P-C)-r*r;
+    float inRadical = b*b-4*c;
+    float t(0.0);
+  
+    if(inRadical<0 || sphere.contains(P)){
+        return nullptr;
+    } else {
+        float t_0 = (-b + sqrt(inRadical))/2.0;
+        float t_1 = (-b - sqrt(inRadical))/2.0;
+        t = t_0 < t_1 ? t_0 : t_1; 
+      }
 };
 
 Radiance3 RayTracer::L_o(const shared_ptr<Surfel> surfel, const Array<shared_ptr<Light>>& lights, const Vector3& w_o) const{
