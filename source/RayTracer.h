@@ -13,19 +13,25 @@ protected:
  
     /** Driver function to traceOneRay, traces a ray through
     the center of each of the image pixels */
-    void traceRays(const shared_ptr<Camera>& camera, const shared_ptr<Scene>& scene, shared_ptr<Image>& img); // Traces one ray per pixel 
+    void traceImage(const shared_ptr<Camera>& camera, const shared_ptr<Scene>& scene, shared_ptr<Image>& img); // Traces one ray per pixel 
     
-    /** Herlper function to the rayTracing function to find 
-    the intersection distance and surfels for a single ray */
-    shared_ptr<UniversalSurfel> traceOneRay(Point2int32 point, const shared_ptr<Camera>& camera, shared_ptr<Image>& img);
+    /** Called by traceImage()
+        Calls intersects()
+        Returns nullptr if no intersection is found */
+    shared_ptr<Surfel> traceOneRay(Point2int32 point,const Rect2D& plane, const shared_ptr<Camera>& camera);
 
-    shared_ptr<Entity> intersects( const Ray& ray, float& d, const Array<shared_ptr<Entity>>& ents);
+    /** Calls intersectSphere()
+        Calls intersectTriangle()
+        Returns nullptr if no intersection is found */
+    shared_ptr<Surfel> intersects( const Ray& ray, float& d, const TriTree& tris) const;
     
-    /** The following return the surfels for the primitives intersected */
-    shared_ptr<UniversalSurfel> foundSphere(Sphere sphere, const Ray& ray);
-    shared_ptr<UniversalSurfel> foundTriangle(TriTree triangle,Ray ray);
+    /** Returns nullptr if no intersecting surface is found */
+    shared_ptr<Surfel> intersectSphere(const Sphere& sphere, const Ray& ray, const Color3& color ) const;
 
-    Radiance3 doShading( shared_ptr<UniversalSurfel> surfel );
+    /** \copybrief intersectSphere*/
+    shared_ptr<Surfel> intersectTriangle(const Tri& triangle, const Ray& ray) const;
+
+    Radiance3 L_o( shared_ptr<UniversalSurfel> surfel, const Array<shared_ptr<Light>>& lights, const Vector3& w_o) const;
 
 public:
     RayTracer(const shared_ptr<Scene>& scene);
