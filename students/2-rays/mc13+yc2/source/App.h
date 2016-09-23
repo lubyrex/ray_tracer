@@ -35,7 +35,7 @@ protected:
 public:
     
     App(const GApp::Settings& settings = GApp::Settings());
-    virtual void onRender() override;
+    //virtual void onRender() override;
     virtual void onInit() override;
     virtual void onAI() override;
     virtual void onNetwork() override;

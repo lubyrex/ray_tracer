@@ -1,6 +1,6 @@
 /** \file App.cpp */
 #include "App.h"
-
+#include "RayTracer.h"
 // Tells C++ to invoke command-line main() function even on OS X and Win32.
 G3D_START_AT_MAIN();
 
@@ -64,6 +64,7 @@ void App::onInit() {
     GApp::onInit();
     setFrameDuration(1.0f / 120.0f);
 
+    
     //Call setScene(shared_ptr<Scene>()) or setScene(MyScene::create()) to replace
     // the default scene here.
     
@@ -77,20 +78,30 @@ void App::onInit() {
    // const std::shared_ptr<Image> img = Image::fromFile("C:/Users/cs371/Desktop/cs371/1-meshes/journal/test.png", ImageFormat::AUTO());
   //  makeHeightfield(1.0, 1.0, *img, 10.0);
     makeGUI();
- 
+    
+
+
     // For higher-quality screenshots:
     // developerWindow->videoRecordDialog->setScreenShotFormat("PNG");
     // developerWindow->videoRecordDialog->setCaptureGui(false);
     developerWindow->cameraControlWindow->moveTo(Point2(developerWindow->cameraControlWindow->rect().x0(), 0));
     loadScene(
         //"G3D Sponza"
-        "G3D Cornell Box" // Load something simple
+        "G3D Triangle" // Load something simple
         //developerWindow->sceneEditorWindow->selectedSceneName()  // Load the first scene encountered 
         );
+
+    shared_ptr<RayTracer> rayTracer(new RayTracer(scene()));
+    shared_ptr<Image> img(Image::create(1000,1000,ImageFormat::RGB32F()));
+    rayTracer->traceImage(GApp::activeCamera(),img); 
+    show(img);
 }
+/*
+void App::onRender(){
 
-void App::onRender(){};
 
+};
+*/
 void App::makeGUI() {
     // Initialize the developer HUD
     createDeveloperHUD();
@@ -221,6 +232,7 @@ void App::onGraphics3D(RenderDevice* rd, Array<shared_ptr<Surface> >& allSurface
 
     // Perform gamma correction, bloom, and SSAA, and write to the native window frame buffer
     m_film->exposeAndRender(rd, activeCamera()->filmSettings(), m_framebuffer->texture(0), settings().hdrFramebuffer.colorGuardBandThickness.x + settings().hdrFramebuffer.depthGuardBandThickness.x, settings().hdrFramebuffer.depthGuardBandThickness.x);
+
 }
 
 
