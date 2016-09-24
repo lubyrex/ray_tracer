@@ -91,7 +91,7 @@ void App::onInit() {
         //developerWindow->sceneEditorWindow->selectedSceneName()  // Load the first scene encountered 
         );
 
-    shared_ptr<RayTracer> rayTracer(new RayTracer(scene()));
+    shared_ptr<RayTracer> rayTracer(new RayTracer(scene(), 0.001));
     shared_ptr<Image> img(Image::create(1000,1000,ImageFormat::RGB32F()));
     rayTracer->traceImage(GApp::activeCamera(),img); 
     show(img);
