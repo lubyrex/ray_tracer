@@ -4,6 +4,15 @@
 // Tells C++ to invoke command-line main() function even on OS X and Win32.
 G3D_START_AT_MAIN();
 
+int m_raysPerPixel;
+int m_maxBounces;
+bool m_showReticle;
+bool m_debugNormals;
+bool m_debugColoredSky;
+shared_ptr<Image> m_currentImage;
+shared_ptr<RayTracer> m_rayTracer;
+
+
 int main(int argc, const char* argv[]) {
     {
         G3DSpecification g3dSpec;
@@ -91,19 +100,45 @@ void App::onInit() {
         //developerWindow->sceneEditorWindow->selectedSceneName()  // Load the first scene encountered 
         );
 
-    shared_ptr<RayTracer> rayTracer(new RayTracer(scene(), 0.01));
-    shared_ptr<Image> img(Image::create(640,400,ImageFormat::RGB32F()));
-    rayTracer->traceImage(GApp::activeCamera(),img); 
-    show(img);
+    m_currentImage =(Image::create(640,400,ImageFormat::RGB32F()));
+    // I initialized it again
+    m_rayTracer=shared_ptr<RayTracer> (new RayTracer(scene(), 0.01));
 }
-/*
+
 void App::onRender(){
 
 
 };
-*/
+
 void App::makeGUI() {
     // Initialize the developer HUD
+    shared_ptr<GuiWindow> window = GuiWindow::create("Controls", debugWindow->theme(), Rect2D::xywh(0, 0, 0, 0), GuiTheme::TOOL_WINDOW_STYLE);
+    GuiPane* pane = window->pane();
+    pane->addLabel("Use WASD keys + right mouse to move");
+
+    pane->addButton("Render High Quality", [this]() { onRender(); })->setWidth(200);
+
+    pane->addNumberBox("Rays per pixel", &m_raysPerPixel, "", GuiTheme::LINEAR_SLIDER, 1, 16, 1);
+    pane->addNumberBox("Max bounces", &m_maxBounces, "", GuiTheme::LINEAR_SLIDER, 1, 16, 1);
+
+    GuiPane* debugging = pane->addPane("Debug Controls");
+    debugging->moveBy(0, 5);
+
+    debugging->addLabel("(Useful with breakpoints)");
+    debugging->addCheckBox("Show reticle", &m_showReticle);
+    debugging->addCheckBox("Visualize normals", &m_debugNormals);    
+    debugging->addCheckBox("Rainbow sky", &m_debugColoredSky);
+    debugging->addButton("Cast Center Ray", [this](){
+       m_rayTracer->traceImage(activeCamera(),m_currentImage);
+       show(m_currentImage);
+    });
+
+    window->pack();
+
+    window->setVisible(true);
+    addWidget(window);
+
+    //break;
     createDeveloperHUD();
 
     debugWindow->setVisible(true);
