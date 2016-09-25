@@ -87,12 +87,12 @@ void App::onInit() {
     developerWindow->cameraControlWindow->moveTo(Point2(developerWindow->cameraControlWindow->rect().x0(), 0));
     loadScene(
         //"G3D Sponza"
-        "G3D Triangle" // Load something simple
+        "G3D Cornell Box" // Load something simple
         //developerWindow->sceneEditorWindow->selectedSceneName()  // Load the first scene encountered 
         );
 
-    shared_ptr<RayTracer> rayTracer(new RayTracer(scene(), 0.001));
-    shared_ptr<Image> img(Image::create(1000,1000,ImageFormat::RGB32F()));
+    shared_ptr<RayTracer> rayTracer(new RayTracer(scene(), 0.01));
+    shared_ptr<Image> img(Image::create(640,400,ImageFormat::RGB32F()));
     rayTracer->traceImage(GApp::activeCamera(),img); 
     show(img);
 }

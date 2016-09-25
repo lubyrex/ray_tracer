@@ -31,9 +31,11 @@ protected:
     //shared_ptr<Surfel> intersectTriangle(const CPUVertexArray& vertexArray, int triIndex, const Ray& ray) const;
     bool intersectTriangle(const Point3& P, const Vector3& w, const Point3 V[3], float b[3], float& t) const;
 
-    Radiance3 L_o(const shared_ptr<Surfel> surfel, const Array<shared_ptr<Light>>& lights, const Vector3& w_o) const;
+    Radiance3 RayTracer::shade(const shared_ptr<Surfel>& surfel, const Array<shared_ptr<Light>>& lights, const Vector3& w_o) const;
 
-    bool isVisible(const shared_ptr<Surfel>& surfel, const TriTree& tris) const;
+    Radiance3 L_o(const shared_ptr<Surfel>& surfel, const Point3& X, const shared_ptr<Light>& light, const Vector3& w_o, const float compFactor, bool scattered) const;
+
+    bool isVisible(const shared_ptr<Surfel>& surfel, const Point3& X, const Vector3& w_i) const;
 public:
     RayTracer(const shared_ptr<Scene>& scene, float e);
      /** Driver function to traceOneRay, traces a ray through
