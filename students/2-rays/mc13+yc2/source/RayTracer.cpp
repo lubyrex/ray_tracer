@@ -35,8 +35,14 @@ shared_ptr<Surfel> RayTracer::traceOneRay(Point2int32 pixel, const Rect2D& plane
     Ray ray(camera->worldRay(pixel.x, pixel.y, plane));
     Array<shared_ptr<Light>> lights;
     scene->getTypedEntityArray(lights);
-
-    img->set(pixel.x, pixel.y, shade(intersects(ray), lights, (-1)*ray.direction()));
+    shared_ptr<Surfel> surfel(intersects(ray.bumpedRay(epsilon).origin(),ray.direction()));
+    Radiance3 pixelValue(0,0,0);
+    if(notNull(surfel)){
+        pixelValue = L_o(surfel, (-1)*ray.direction(),lights);
+    }
+    img->set(pixel.x, pixel.y, pixelValue);
+        
+        //L_o(intersects(ray.bumpedRay(epsilon).origin(),ray.direction()), (-1)*ray.direction(), lights)/*shade(intersects(ray), lights, (-1)*ray.direction())*/);
 
     return nullptr;
     //Trace a single ray from the center of the specified pixel
@@ -45,13 +51,14 @@ shared_ptr<Surfel> RayTracer::traceOneRay(Point2int32 pixel, const Rect2D& plane
     // return foundTriangle, or foundSphere accordingly
 };
 
-shared_ptr<Surfel> RayTracer::intersects(const Ray& ray/*, const TriTree& tris*/) const {
+shared_ptr<Surfel> RayTracer::intersects(const Point3& P, const Vector3& w/*const Ray& ray/*, const TriTree& tris*/) const {
+  //  return tris->intersectRay(Ray(P,w));
     TriTree::Hit hit;
     shared_ptr<UniversalSurfel> surfel(new UniversalSurfel);
 
     CPUVertexArray vertexArray(tris->vertexArray());
-    Vector3 w(ray.direction());
-    Point3 P(ray.origin() + epsilon*w);
+    //Vector3 w(direction);
+    //Point3 P(origin);
 
     float t(0);
     float b[3];
@@ -71,8 +78,8 @@ shared_ptr<Surfel> RayTracer::intersects(const Ray& ray/*, const TriTree& tris*/
                 hit.distance = t;
                 hit.backface = (w.dot(tri.normal(vertexArray)) > 0);
                 hit.triIndex = i;
-               /* hit.u = b[0];
-                hit.v = b[1];*/
+                hit.u = b[0];
+                hit.v = b[1];
             };
         };
 
@@ -148,26 +155,52 @@ shared_ptr<Surfel> RayTracer::intersectSphere(const Sphere& sphere, const Ray& r
     };
 };
 
-Radiance3 RayTracer::shade(const shared_ptr<Surfel>& surfel, const Array<shared_ptr<Light>>& lights, const Vector3& w_o) const {
-    if (notNull(surfel)) {
-        Point3 X(surfel->position);
-        Radiance3 L_e(surfel->emittedRadiance(w_o));
-        Radiance3 L_d(0, 0, 0);
-        Radiance3 L_s(0, 0, 0);
+// Adapted from C++ Direct Illumination [_rn_dirctIllm] from http://graphicscodex.com 
+Radiance3 RayTracer::L_i(const Point3& X, const Vector3& wi,const Array<shared_ptr<Light>>& lights) const {
+    // Find the first intersection 
+    shared_ptr<Surfel> surfelY = intersects(X,wi);
 
-
-        for (int i(0); i < lights.size(); ++i) {
-            shared_ptr<Light> light(lights[i]);
-            L_d += L_o(surfel, X, light, w_o, false) + surfel->reflectivity(Random::threadCommon()) * 0.05f;
-            L_s += L_o(surfel, X, light, w_o, true);
-        };
-        return L_e + L_d + L_s;
-
-    }
-    else {
+    if (notNull(surfelY)) {
+        // Compute the light leaving Y, which is the same as
+        // the light entering X when the medium is non-absorptive
+        return L_o(surfelY, -wi,lights);
+    } else {
         return Radiance3(0, 0, 0);
-    };
+    }
+}
+
+// Adapted from C++ Direct Illumination [_rn_dirctIllm] from http://graphicscodex.com 
+Radiance3 RayTracer::L_o(const shared_ptr<Surfel>& surfelX, const Vector3& wo, const Array<shared_ptr<Light>>& lights) const {
+    // Begin with the emitted radiance
+    Radiance3 L = surfelX->emittedRadiance(wo);
+    const Point3& X = surfelX->position;
+    const Vector3& n = surfelX->shadingNormal;
+
+    // Add direct illumination from each light
+    for (int i = 0; i < lights.size(); ++i) {
+        const shared_ptr<Light> light(lights[i]);
+        const Point3& Y(light->position().xyz());
+
+        if (isVisible(X,Y)) {
+            const Vector3& wi((Y - X*(light->position().w)).direction());
+            Biradiance3& Bi(light->biradiance(X));
+            const Color3& f (surfelX->finiteScatteringDensity(wi, wo));
+            L += Bi * f * abs(wi.dot(n));
+        }
+    }
+    
+    return L;
+}
+
+
+bool RayTracer::isVisible(const Point3& X, const Point3& Y) const {
+    Vector3 w_i((Y-X).direction());
+    Point3 origin(Y+epsilon*w_i);
+    shared_ptr<Surfel> intersect(intersects(origin, (-1)*w_i)); 
+    return (intersect != nullptr) && ((intersect->position-X).length()<= epsilon);
 };
+
+/*
 
 Radiance3 RayTracer::L_o(const shared_ptr<Surfel>& surfel, const Point3& X, const shared_ptr<Light>& light, const Vector3& w_o,  bool scatter) const {
     Vector4 Y(light->position());
@@ -185,8 +218,27 @@ Radiance3 RayTracer::L_o(const shared_ptr<Surfel>& surfel, const Point3& X, cons
         return Radiance3(0, 0, 0);
     };
 };
+*/
 
-bool RayTracer::isVisible(const shared_ptr<Surfel>& surfel, const Point3& Y, const Vector3& w_i) const {
-    Ray ray(Y, -w_i);
-    return (intersects(ray) != surfel);
+/*
+Radiance3 RayTracer::shade(const shared_ptr<Surfel>& surfel, const Array<shared_ptr<Light>>& lights, const Vector3& w_o) const {
+    if (notNull(surfel)) {
+        Point3 X(surfel->position);
+        Radiance3 L_e(surfel->emittedRadiance(w_o));
+        Radiance3 L_d(0, 0, 0);
+        Radiance3 L_s(0, 0, 0);
+
+
+        for (int i(0); i < lights.size(); ++i) {
+            shared_ptr<Light> light(lights[i]);
+            L_d += L_o(surfel, X, light, w_o, false) + surfel->reflectivity(Random::threadCommon()) * 0.05f;
+            //L_s += L_o(surfel, X, light, w_o, true);
+        };
+        return L_e + L_d + L_s;
+
+    }
+    else {
+        return Radiance3(0, 0, 0);
+    };
 };
+*/
