@@ -71,8 +71,8 @@ shared_ptr<Surfel> RayTracer::intersects(const Ray& ray/*, const TriTree& tris*/
                 hit.distance = t;
                 hit.backface = (w.dot(tri.normal(vertexArray)) > 0);
                 hit.triIndex = i;
-                hit.u = b[0];
-                hit.v = b[1];
+               /* hit.u = b[0];
+                hit.v = b[1];*/
             };
         };
 
@@ -150,7 +150,7 @@ shared_ptr<Surfel> RayTracer::intersectSphere(const Sphere& sphere, const Ray& r
 
 Radiance3 RayTracer::shade(const shared_ptr<Surfel>& surfel, const Array<shared_ptr<Light>>& lights, const Vector3& w_o) const {
     if (notNull(surfel)) {
-        Point3 X(surfel->position+surfel->shadingNormal*epsilon);
+        Point3 X(surfel->position);
         Radiance3 L_e(surfel->emittedRadiance(w_o));
         Radiance3 L_d(0, 0, 0);
         Radiance3 L_s(0, 0, 0);
@@ -169,7 +169,7 @@ Radiance3 RayTracer::shade(const shared_ptr<Surfel>& surfel, const Array<shared_
     };
 };
 
-Radiance3 RayTracer::L_o(const shared_ptr<Surfel>& surfel, const Point3& X, const shared_ptr<Light>& light, const Vector3& w_o, bool scatter) const {
+Radiance3 RayTracer::L_o(const shared_ptr<Surfel>& surfel, const Point3& X, const shared_ptr<Light>& light, const Vector3& w_o,  bool scatter) const {
     Vector4 Y(light->position());
     Vector3& w_i((Y.xyz() - X*Y.w).direction());
     const Vector3& n(surfel->shadingNormal);
@@ -187,12 +187,6 @@ Radiance3 RayTracer::L_o(const shared_ptr<Surfel>& surfel, const Point3& X, cons
 };
 
 bool RayTracer::isVisible(const shared_ptr<Surfel>& surfel, const Point3& Y, const Vector3& w_i) const {
-    Ray ray(Y, (-1)*w_i);
-    shared_ptr<Surfel> intSurfel = intersects(ray);
-    if (intSurfel != nullptr && surfel != nullptr) {
-        return ((intSurfel->position - surfel->position).length()<epsilon*3);
-    }
-    else {
-        return false;
-    }
+    Ray ray(Y, -w_i);
+    return (intersects(ray) != surfel);
 };
