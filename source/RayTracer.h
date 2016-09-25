@@ -33,7 +33,7 @@ protected:
 
     Radiance3 RayTracer::shade(const shared_ptr<Surfel>& surfel, const Array<shared_ptr<Light>>& lights, const Vector3& w_o) const;
 
-    Radiance3 L_o(const shared_ptr<Surfel>& surfel, const Point3& X, const shared_ptr<Light>& light, const Vector3& w_o, const float compFactor, bool scattered) const;
+    Radiance3 L_o(const shared_ptr<Surfel>& surfel, const Point3& X, const shared_ptr<Light>& light, const Vector3& w_o, bool scattered) const;
 
     bool isVisible(const shared_ptr<Surfel>& surfel, const Point3& X, const Vector3& w_i) const;
 public:
