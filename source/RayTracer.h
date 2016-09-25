@@ -37,7 +37,9 @@ protected:
 
     Radiance3 RayTracer::L_i(const Point3& X, const Vector3& wi,const Array<shared_ptr<Light>>& lights) const;
 
-    Radiance3 L_o(const shared_ptr<Surfel>& surfelX, const Vector3& wo, const Array<shared_ptr<Light>>& lights) const;//L_o(const shared_ptr<Surfel>& surfel, const Point3& X, const shared_ptr<Light>& light, const Vector3& w_o, bool scattered) const;
+    Radiance3 L_o(const shared_ptr<Surfel>& surfelX, const Vector3& wo, const Array<shared_ptr<Light>>& lights, int numScattering) const;//L_o(const shared_ptr<Surfel>& surfel, const Point3& X, const shared_ptr<Light>& light, const Vector3& w_o, bool scattered) const;
+
+    Radiance3 doIndirectLight(const shared_ptr<Surfel>& surfelX, const Vector3& wo, const Array<shared_ptr<Light>>& lights) const;
 
     bool isVisible(const Point3& X, const Point3& Y/*const shared_ptr<Surfel>& surfel, const Point3& X, const Vector3& w_i*/) const;
 public:
