@@ -100,9 +100,9 @@ void App::onInit() {
         //developerWindow->sceneEditorWindow->selectedSceneName()  // Load the first scene encountered 
         );
 
-    m_currentImage =(Image::create(640,400,ImageFormat::RGB32F()));
+    m_currentImage =(Image::create(320,200,ImageFormat::RGB32F()));
     // I initialized it again
-    m_rayTracer=shared_ptr<RayTracer> (new RayTracer(scene(), 0.01));
+    m_rayTracer=shared_ptr<RayTracer> (new RayTracer(scene(), 0.0001, false));
 }
 
 void App::onRender(){
