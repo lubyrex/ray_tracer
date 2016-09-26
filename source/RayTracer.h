@@ -10,11 +10,12 @@
 class RayTracer {
 protected:
     shared_ptr<Scene> m_scene;
+    float m_epsilon;    
     shared_ptr<TriTree> m_triTree;
-    Array<shared_ptr<Sphere>> mySpheres; 
-    bool m_concurrent; 
+    Array<shared_ptr<Sphere>> m_mySpheres; 
+    bool m_runConcurrent; 
     bool m_spheresOn;
-    float m_epsilon;
+    int m_raysPerPixel; 
 
 
     /** Called by traceImage()
@@ -36,7 +37,7 @@ protected:
 
 
     /** Returns nullptr if no intersecting surface is found */
-    shared_ptr<Surfel> intersectSphere(const Sphere& sphere, const Ray& ray, const Color3& color) const;
+    bool intersectSphere(const Point3& P, const Vector3& w, float& t, const shared_ptr<Sphere>& sphere, const Color3& color) const;
 
     /** \copybrief intersectSphere*/
     //shared_ptr<Surfel> intersectTriangle(const CPUVertexArray& vertexArray, int triIndex, const Ray& ray) const;
@@ -51,8 +52,15 @@ protected:
 
     bool isVisible(const Point3& X, const Point3& Y/*const shared_ptr<Surfel>& surfel, const Point3& X, const Vector3& w_i*/) const;
 public:
-    RayTracer(const shared_ptr<Scene>& scene, float e, bool mult);
+    RayTracer(const shared_ptr<Scene>& scene, float e);
     /** Driver function to traceOneRay, traces a ray through
    the center of each of the image pixels */
     void traceImage(const shared_ptr<Camera>& camera,/* const shared_ptr<Scene>& scene,*/ const shared_ptr<Image>& img);
+
+    void setConcurrent(bool on);
+    
+    void setPrimitives(bool on);
+
+    void setNumRays(int num);
+
 };

@@ -6,6 +6,39 @@
                mc13@williams.edu           
                yc2@williams.edu   
 
+
+
+
+2016-09-26: Intersecting Spheres
+=====================================================================
+Not working. Try to debug it. what it does: 
+- When render is pressed App calls  m_rayTracer-> setPrimitives(m_fixedPrimitives); Which sets the RayTracer::m_spheresOn;
+- if m_spheresOn is set, TraceImage constructs an array of spheres (right now containing just one sephere at (width/2, height/2, -3), with radius 0.1.
+- if m_spheresOn is set, intersects() calls intersectSphere() for each sphere in the array, passing in the distance t_s to be comupted.
+- t_s is then compared to t_t (for triangle intersection), if t_s is smaller the sufel for the sphere is constructed and returned.
+- The position X of the surfel is at the origin of the ray translated t_s units in the direcition of the ray. 
+- The normal of the surfel is the direction of the vector (X-C) where, C is the center of the sphere. 
+- Bugs may be in how we determine the surfel's position and normal and or in how we compute intersection. 
+- Debug it 
+
+2016-09-26: Ray Casting Progress
+=====================================================================
+![First intersectTriangle Result](intersectTriangle.jpg)
+
+![First shading result](Shading-1.jpg)
+
+![CornellBox - first Attempt](CornellBox-1.jpg)
+
+![Cornell Box + ambient lights](CornellBox+Ambient.jpg)
+
+![Fixed Compensation factor](correctedCompFactor-precisionError.jpg)
+
+![Shadows #1](ShadowsFirstAttempt.jpg)
+
+![Shadows Fixed](Shadows+HandledPrecision.jpg)
+
+![Indirect Light](IndirectLights.jpg)
+
 2016-09-22: Time Log
 =====================================================================
 Lab section -> 3h. 
@@ -20,10 +53,21 @@ Accomplished:
 Accomplished: 
     Triangle Intersection MVP, shading MVP. 
 
+2016-09-25 -> [12:30, 18:30]
+Acccomplished: 
+    IndirectRays, restructred L_i, L_o. 
+
+
 2016-09-22: Algorithms
 =====================================================================
 Radiance: Lambert's cosine law: observable surface falls with the cosine of the measure of the angle, from the vertical. 
     - Compute cosine compensation with **dot product**; $a \dot b = ||a||~||b|| cos\theta$, where $\theta$ is the angle between a and b. The compensation factor for measuring away from the normal is given by Lambert's law (the dot product between the unit direction vector, and the normal). 
+
+L_i -> if there's an intersecting surfel compute its radiance value
+
+L_o -> computes radiance value for surfel -> Emmitted+Direct+Scattered light over all lights in scene. 
+
+Indirect scattering computed by do IndirectLight with 1-depth recursion and 3 indirect rays 
 
 2016-09-22: Implementation
 =====================================================================
