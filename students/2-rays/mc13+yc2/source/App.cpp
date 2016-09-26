@@ -191,64 +191,6 @@ void App::makeGUI() {
     infoPane->addLabel("in App::onInit().");
     infoPane->addButton("Exit", [this]() { m_endProgram = true; });
     infoPane->pack();
-
-    // More examples of debugging GUI controls:
-    // debugPane->addCheckBox("Use explicit checking", &explicitCheck);
-    // debugPane->addTextBox("Name", &myName);
-    // debugPane->addNumberBox("height", &height, "m", GuiTheme::LINEAR_SLIDER, 1.0f, 2.5f);
-    // button = debugPane->addButton("Run Simulator");
-    // debugPane->addButton("Generate Heightfield", [this](){ generateHeightfield(); });
-    // debugPane->addButton("Generate Heightfield", [this](){ makeHeightfield(imageName, scale, "model/heightfield.off"); });
-
-    //// makeCylinder GUI
-    //GuiPane* cylinderPane = debugPane->addPane("Cylinder");    
-    //cylinderPane->moveRightOf(infoPane, 1.0f);
-    //cylinderPane->setNewChildSize(240);
-    //cylinderPane->addLabel("Cylinder Paramenters"); 
-    //cylinderPane->addNumberBox("Radius", &cylR, "m");
-    //cylinderPane->addNumberBox("Height", &cylH, "m");
-    //cylinderPane->addButton("Generate", [this](){
-    //    GApp::drawMessage("Generating Cylinder...");
-    //    makeCylinder(cylR,cylH);
-    //    ArticulatedModel::clearCache();
-    //    loadScene("Test Scene");
-
-    //});
-    //cylinderPane->pack();
-
-    //GuiPane* heightfieldPane = debugPane->addPane("Heightfield");    
-    //heightfieldPane->moveRightOf(cylinderPane, 4.0f);
-    //heightfieldPane->setNewChildSize(240);
-    //heightfieldPane->addLabel("Heightfield Paramenters"); 
-    //heightfieldPane->addNumberBox("Max Y", &yScale, "m", 
-    //GuiTheme::LOG_SLIDER, 0.0f, 100.0f)->setUnitsSize(30);
-    //    
-    //heightfieldPane->addNumberBox("XZ Scale", &XZScale, "m/px", 
-    //GuiTheme::LOG_SLIDER, 1, 10)->setUnitsSize(30);
-
-    //heightfieldPane->beginRow(); {
-    //heightfieldPane->addTextBox("Input Image", &hfSource)->setWidth(210);
-    //heightfieldPane->addButton("...", [this]() {
-    //     FileDialog::getFilename(hfSource, "png", false);
-    //    })->setWidth(30);
-    //} heightfieldPane->endRow();
-    //
-    //heightfieldPane->addButton("Generate", [this](){
-    //    shared_ptr<Image> image;
-    //    try {
-    //        image = Image::fromFile(hfSource);
-    //        GApp::drawMessage("Generating Heightfield...");
-    //        makeHeightfield(XZScale, XZScale, *image, yScale);
-    //        ArticulatedModel::clearCache();
-    //        loadScene("Test Scene");
-    //    } catch (...) {
-    //        msgBox("Unable to load the image.", hfSource);
-    //    }
-    //});
-    //heightfieldPane->pack();
-
-    //debugWindow->pack();
-    //debugWindow->setRect(Rect2D::xywh(0, 0, (float)window()->width(), debugWindow->rect().height()));
 }
 
 
