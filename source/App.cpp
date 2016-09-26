@@ -143,7 +143,7 @@ void App::makeGUI() {
     pane->addDropDownList("resolution", resolution, &m_indexPointer);
     pane->addCheckBox("fixed primitives", &m_fixedPrimitives);
     pane->addCheckBox("multithreading", &m_multiThreading);
-    pane->addNumberBox("Rays per pixel", &m_raysPerPixel, "", GuiTheme::LINEAR_SLIDER, 1, 2048, 1);
+    pane->addNumberBox("Rays per pixel", &m_raysPerPixel, "", GuiTheme::LINEAR_SLIDER, 0, 2048, 1);
     pane->addButton("reload", [this]() {loadScene(
 
         developerWindow->sceneEditorWindow->selectedSceneName()  // Load the first scene encountered 
