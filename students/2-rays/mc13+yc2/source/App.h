@@ -6,6 +6,8 @@
  */
 #pragma once
 #include <G3D/G3DAll.h>
+#include <GLG3D/GLG3D.h>
+#include <thread>
 
 /** \brief Application framework. */
 class App : public GApp {
@@ -52,4 +54,5 @@ public:
     virtual void onUserInput(UserInput* ui) override;
     virtual void onCleanup() override;
     virtual void onRender();
+    virtual void message(const String& msg) const;
 };

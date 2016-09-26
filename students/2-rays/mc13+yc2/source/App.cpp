@@ -1,16 +1,20 @@
 /** \file App.cpp */
+
+
 #include "App.h"
 #include "RayTracer.h"
+
+
+using namespace std;
 // Tells C++ to invoke command-line main() function even on OS X and Win32.
 G3D_START_AT_MAIN();
 
 int m_raysPerPixel;
-int m_maxBounces;
-bool m_showReticle;
-bool m_debugNormals;
-bool m_debugColoredSky;
+bool m_fixedPrimitives;
+bool m_multiThreading;
 shared_ptr<Image> m_currentImage;
 shared_ptr<RayTracer> m_rayTracer;
+int m_indexPointer;
 
 
 int main(int argc, const char* argv[]) {
@@ -24,7 +28,7 @@ int main(int argc, const char* argv[]) {
 
     // Change the window and other startup parameters by modifying the
     // settings class.  For example:
-    settings.window.caption             = argv[0];
+    settings.window.caption = argv[0];
 
     // Set enable to catch more OpenGL errors
     // settings.window.debugContext     = true;
@@ -32,21 +36,21 @@ int main(int argc, const char* argv[]) {
     // Some common resolutions:
     // settings.window.width            =  854; settings.window.height       = 480;
     // settings.window.width            = 1024; settings.window.height       = 768;
-    settings.window.width               = 1280; settings.window.height       = 720;
+    settings.window.width = 1280; settings.window.height = 720;
     //settings.window.width             = 1920; settings.window.height       = 1080;
     // settings.window.width            = OSWindow::primaryDisplayWindowSize().x; settings.window.height = OSWindow::primaryDisplayWindowSize().y;
-    settings.window.fullScreen          = false;
-    settings.window.resizable           = ! settings.window.fullScreen;
-    settings.window.framed              = ! settings.window.fullScreen;
+    settings.window.fullScreen = false;
+    settings.window.resizable = !settings.window.fullScreen;
+    settings.window.framed = !settings.window.fullScreen;
 
     // Set to true for a significant performance boost if your app can't render at 60fps, or if
     // you *want* to render faster than the display.
-    settings.window.asynchronous        = false;
+    settings.window.asynchronous = false;
 
     settings.hdrFramebuffer.depthGuardBandThickness = Vector2int16(64, 64);
     settings.hdrFramebuffer.colorGuardBandThickness = Vector2int16(0, 0);
-    settings.dataDir                    = FileSystem::currentDirectory();
-    settings.screenshotDirectory        = "../journal/";
+    settings.dataDir = FileSystem::currentDirectory();
+    settings.screenshotDirectory = "../journal/";
 
     settings.renderer.deferredShading = true;
     settings.renderer.orderIndependentTransparency = false;
@@ -59,7 +63,7 @@ App::App(const GApp::Settings& settings) : GApp(settings) {
 }
 
 /*float cylR(1.0f);
-float cylH(2.0f); 
+float cylH(2.0f);
 int XZScale(1);
 float yScale(1);
 String hfSource = "C:/Users/cs371/Desktop/cs371/1-meshes/journal/test.png";
@@ -73,12 +77,12 @@ void App::onInit() {
     GApp::onInit();
     setFrameDuration(1.0f / 120.0f);
 
-    
+
     //Call setScene(shared_ptr<Scene>()) or setScene(MyScene::create()) to replace
     // the default scene here.
-    
-    showRenderingStats      = false;
-    
+
+    showRenderingStats = false;
+
     //Build staircase
     //staircase();
     //pineTree();
@@ -87,7 +91,7 @@ void App::onInit() {
    // const std::shared_ptr<Image> img = Image::fromFile("C:/Users/cs371/Desktop/cs371/1-meshes/journal/test.png", ImageFormat::AUTO());
   //  makeHeightfield(1.0, 1.0, *img, 10.0);
     makeGUI();
-    
+
 
 
     // For higher-quality screenshots:
@@ -98,39 +102,81 @@ void App::onInit() {
         //"G3D Sponza"
         "G3D Cornell Box" // Load something simple
         //developerWindow->sceneEditorWindow->selectedSceneName()  // Load the first scene encountered 
-        );
+    );
 
-    m_currentImage =(Image::create(320,200,ImageFormat::RGB32F()));
+
     // I initialized it again
-    m_rayTracer=shared_ptr<RayTracer> (new RayTracer(scene(), 0.0001, false));
+    m_rayTracer = shared_ptr<RayTracer>(new RayTracer(scene(), 0.0001));
+
+    const shared_ptr<Entity>&       entity = shared_ptr<Entity>();
+
 }
 
-void App::onRender(){
 
 
+void App::onRender() {
+    message("rendering...");
+    StopWatch timer(StopWatch("Timer"));
+    timer.tick();
+    m_rayTracer->traceImage(activeCamera(), m_currentImage);
+    timer.tock();
+    debugPrintf("%f s\n", timer.elapsedTime());
+    
+   // String filename(("/journal/%s - %f s\n", scene()->name(), timer.elapsedTime()));
+    //m_currentImage->save(filename);
+    show(m_currentImage,("%f s\n", timer.elapsedTime()));
 };
+
+void App::message(const String& msg) const {
+    renderDevice->clear();
+    renderDevice->push2D();
+    debugFont->draw2D(renderDevice, msg, renderDevice->viewport().center(), 12,
+        Color3::white(), Color4::clear(), GFont::XALIGN_CENTER, GFont::YALIGN_CENTER);
+    renderDevice->pop2D();
+
+    // Force update so that we can see the message
+    renderDevice->swapBuffers();
+}
+
 
 void App::makeGUI() {
     // Initialize the developer HUD
-    shared_ptr<GuiWindow> window = GuiWindow::create("Controls", debugWindow->theme(), Rect2D::xywh(0, 0, 0, 0), GuiTheme::TOOL_WINDOW_STYLE);
+    shared_ptr<GuiWindow> window = GuiWindow::create("Controls", debugWindow->theme(), Rect2D::xywh(1025, 175, 0, 0), GuiTheme::TOOL_WINDOW_STYLE);
     GuiPane* pane = window->pane();
     pane->addLabel("Use WASD keys + right mouse to move");
+    Array<String> resolution;
+    resolution.append("1x1", "320x200", "640x400");
+    pane->addDropDownList("resolution", resolution, &m_indexPointer);
+    pane->addCheckBox("fixed primitives", &m_fixedPrimitives);
+    pane->addCheckBox("multithreading", &m_multiThreading);
+    pane->addNumberBox("Rays per pixel", &m_raysPerPixel, "", GuiTheme::LINEAR_SLIDER, 1, 2048, 1);
+    pane->addButton("reload", [this]() {loadScene(
 
-    pane->addButton("Render High Quality", [this]() { onRender(); })->setWidth(200);
+        developerWindow->sceneEditorWindow->selectedSceneName()  // Load the first scene encountered 
+    ); });
 
-    pane->addNumberBox("Rays per pixel", &m_raysPerPixel, "", GuiTheme::LINEAR_SLIDER, 1, 16, 1);
-    pane->addNumberBox("Max bounces", &m_maxBounces, "", GuiTheme::LINEAR_SLIDER, 1, 16, 1);
+    pane->addButton("render", [this]() {
 
-    GuiPane* debugging = pane->addPane("Debug Controls");
-    debugging->moveBy(0, 5);
+        try {
+            
+            switch (m_indexPointer) {
+            case 0:m_currentImage = (Image::create(1, 1, ImageFormat::RGB8()));
+                break;
+            case 1:m_currentImage = (Image::create(320, 200, ImageFormat::RGB8()));
+                break;
+            case 2:m_currentImage = (Image::create(640, 400, ImageFormat::RGB8()));
+                break;
+            }
+            
+        }
+        catch (...) {
+            msgBox("Unable to render the image.");
+        }
+        m_rayTracer-> setConcurrent(m_multiThreading);
+        m_rayTracer-> setPrimitives(m_fixedPrimitives);
+        m_rayTracer-> setNumRays(m_raysPerPixel);
+        onRender();
 
-    debugging->addLabel("(Useful with breakpoints)");
-    debugging->addCheckBox("Show reticle", &m_showReticle);
-    debugging->addCheckBox("Visualize normals", &m_debugNormals);    
-    debugging->addCheckBox("Rainbow sky", &m_debugColoredSky);
-    debugging->addButton("Cast Center Ray", [this](){
-       m_rayTracer->traceImage(activeCamera(),m_currentImage);
-       show(m_currentImage);
     });
 
     window->pack();
@@ -145,7 +191,7 @@ void App::makeGUI() {
     developerWindow->videoRecordDialog->setEnabled(true);
 
     GuiPane* infoPane = debugPane->addPane("Info", GuiTheme::ORNATE_PANE_STYLE);
-    
+
     // Example of how to add debugging controls
     infoPane->addLabel("You can add GUI controls");
     infoPane->addLabel("in App::onInit().");
@@ -185,7 +231,7 @@ void App::makeGUI() {
     //    
     //heightfieldPane->addNumberBox("XZ Scale", &XZScale, "m/px", 
     //GuiTheme::LOG_SLIDER, 1, 10)->setUnitsSize(30);
- 
+
     //heightfieldPane->beginRow(); {
     //heightfieldPane->addTextBox("Input Image", &hfSource)->setWidth(210);
     //heightfieldPane->addButton("...", [this]() {
@@ -216,7 +262,7 @@ void App::makeGUI() {
 // for you to modify. If you aren't changing the hardware rendering strategy, you can
 // delete this override entirely.
 void App::onGraphics3D(RenderDevice* rd, Array<shared_ptr<Surface> >& allSurfaces) {
-    
+
     if (!scene()) {
         if ((submitToDisplayMode() == SubmitToDisplayMode::MAXIMIZE_THROUGHPUT) && (!rd->swapBuffersAutomatically())) {
             swapBuffers();
