@@ -12,28 +12,12 @@
 /** \brief Application framework. */
 class App : public GApp {
 protected:
+     /** Allocated by expose and render */
+    shared_ptr<Texture> m_result;
 
     /** Called from onInit */
     void makeGUI();
 
-    /**Constructs and outputs Staircase.Scene.
-    Any file  Called from onInit.*/
-    void staircase();
-    /**Constructs and outputs PineTree.Scene.Any file 
-    Called from onInit. */
-    void pineTree();
-    
-    /**Generates cylinder.off file 
-    Called from onInit. */
-    void makeCylinder(const float& r, const float& h);
-
-    /**Generates heightfield.off file 
-    Called from onInit. */
-    void makeHeightfield(const int& x, const int& z, const Image&, const float& max);
- 
-    /**Generates glass.off file 
-    Called from onInit. */
-   // void makeGlass(const int& rot);
 public:
     
     App(const GApp::Settings& settings = GApp::Settings());

@@ -110,6 +110,15 @@ void App::onRender() {
     debugPrintf("%f s\n", timer.elapsedTime());
     String time(format("%f s \n", timer.elapsedTime()));
     show(m_currentImage,time);
+
+     // Post-process
+   const shared_ptr<Texture>& src = Texture::fromImage("Source", m_currentImage);
+    if (m_result) {
+        m_result->resize(m_currentImage->width(), m_currentImage->height());
+    };
+
+    m_film->exposeAndRender(renderDevice, m_debugCamera->filmSettings(), src, settings().hdrFramebuffer.colorGuardBandThickness.x/* + settings().hdrFramebuffer.depthGuardBandThickness.x*/, settings().hdrFramebuffer.depthGuardBandThickness.x, m_result);
+
 };
 
 void App::message(const String& msg) const {
