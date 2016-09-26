@@ -121,9 +121,6 @@ void App::onRender() {
     m_rayTracer->traceImage(activeCamera(), m_currentImage);
     timer.tock();
     debugPrintf("%f s\n", timer.elapsedTime());
-    
-   // String filename(("/journal/%s - %f s\n", scene()->name(), timer.elapsedTime()));
-    //m_currentImage->save(filename);
     show(m_currentImage,("%f s\n", timer.elapsedTime()));
 };
 
@@ -172,9 +169,9 @@ void App::makeGUI() {
         catch (...) {
             msgBox("Unable to render the image.");
         }
-        m_rayTracer-> setConcurrent(m_multiThreading);
-        m_rayTracer-> setPrimitives(m_fixedPrimitives);
-        m_rayTracer-> setNumRays(m_raysPerPixel);
+        m_rayTracer->m_runConcurrent= m_multiThreading;
+        m_rayTracer->m_spheresOn = m_fixedPrimitives;
+        m_rayTracer->m_raysPerPixel = m_raysPerPixel;
         onRender();
 
     });
