@@ -13,9 +13,7 @@ protected:
     float m_epsilon;    
     shared_ptr<TriTree> m_triTree;
     Array<shared_ptr<Sphere>> m_mySpheres; 
-    bool m_runConcurrent; 
-    bool m_spheresOn;
-    int m_raysPerPixel; 
+
 
 
     /** Called by traceImage()
@@ -56,11 +54,8 @@ public:
     /** Driver function to traceOneRay, traces a ray through
    the center of each of the image pixels */
     void traceImage(const shared_ptr<Camera>& camera,/* const shared_ptr<Scene>& scene,*/ const shared_ptr<Image>& img);
-
-    void setConcurrent(bool on);
-    
-    void setPrimitives(bool on);
-
-    void setNumRays(int num);
+    bool m_runConcurrent; 
+    bool m_spheresOn;
+    int m_raysPerPixel; 
 
 };

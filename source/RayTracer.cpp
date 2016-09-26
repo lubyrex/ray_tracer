@@ -5,17 +5,7 @@
 RayTracer::RayTracer(const shared_ptr<Scene>& s, float e) :
     m_scene(s), m_epsilon(e) {};
 
-void RayTracer::setConcurrent(bool on) {
-    m_runConcurrent = on;
-};
 
-void RayTracer::setPrimitives(bool on) {
-    m_spheresOn = on;
-};
-
-void RayTracer::setNumRays(int num) {
-    m_raysPerPixel = num;
-};
 
 
 #define numIndRays 4
@@ -39,31 +29,17 @@ void RayTracer::traceImage(const shared_ptr<Camera>& camera,/* const shared_ptr<
 
     Vector2 dimensions((float)width, (float)height);
     Rect2D plane(dimensions);
-    if (m_runConcurrent) {
-        Thread::runConcurrently(Point2int32(0, 0), Point2int32(width, height), [&](Point2int32 pixel) {
-            Ray ray(camera->worldRay(pixel.x, pixel.y, plane));
-            // Point2int32 pixel(x, y);
-            Radiance3 sum(0, 0, 0);
-            for (int i(0); i < m_raysPerPixel; ++i) {
-                ray = ray.bumpedRay(m_epsilon);
-                sum += L_i(ray.origin(), ray.direction(), lights, numIndRays, 1);
-            };
-            img->set(pixel.x, pixel.y, sum / (float)m_raysPerPixel);
-        });
-    } else {
-        for (Point2int32 pixel; pixel.y < height; ++pixel.y) {
-            for (pixel.x = 0; pixel.x < width; ++pixel.x) {
-                Ray ray(camera->worldRay(pixel.x, pixel.y, plane));
-                // Point2int32 pixel(x, y);
-                Radiance3 sum(0, 0, 0);
-                for (int i(0); i < m_raysPerPixel; ++i) {
-                    ray = ray.bumpedRay(m_epsilon);
-                    sum += L_i(ray.origin(), ray.direction(), lights, numIndRays, 1);
-                };
-                img->set(pixel.x, pixel.y, sum / (float)m_raysPerPixel);
-            };
+   
+    Thread::runConcurrently(Point2int32(0, 0), Point2int32(width, height), [&](Point2int32 pixel) {
+        Ray ray(camera->worldRay(pixel.x, pixel.y, plane));
+        // Point2int32 pixel(x, y);
+        Radiance3 sum(0, 0, 0);
+        for (int i(0); i < m_raysPerPixel; ++i) {
+            ray = ray.bumpedRay(m_epsilon);
+            sum += L_i(ray.origin(), ray.direction(), lights, numIndRays, 1);
         };
-    };
+        img->set(pixel.x, pixel.y, sum / (float)m_raysPerPixel);
+    }, !m_runConcurrent);
 };
 
 // Adapted from C++ Direct Illumination [_rn_dirctIllm] from http://graphicscodex.com 
@@ -231,7 +207,7 @@ Radiance3 RayTracer::L_o(const shared_ptr<Surfel>& surfelX, const Vector3& wo, c
                        indirectLight += doIndirectLight(surfelX, wo, lights, depth);
                     };
                     indirectLight/=(float)numScattering;
-                    L+= indirectLight;
+                    L+= 2*pi()*indirectLight;
                 };
                 */
     };
