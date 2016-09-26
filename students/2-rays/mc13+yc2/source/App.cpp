@@ -62,12 +62,6 @@ int main(int argc, const char* argv[]) {
 App::App(const GApp::Settings& settings) : GApp(settings) {
 }
 
-/*float cylR(1.0f);
-float cylH(2.0f);
-int XZScale(1);
-float yScale(1);
-String hfSource = "C:/Users/cs371/Desktop/cs371/1-meshes/journal/test.png";
-*/
 // Called before the application loop begins.  Load data here and
 // not in the constructor so that common exceptions will be
 // automatically caught.
@@ -83,13 +77,6 @@ void App::onInit() {
 
     showRenderingStats = false;
 
-    //Build staircase
-    //staircase();
-    //pineTree();
-
-    //makeCylinder(cylR, cylH);
-   // const std::shared_ptr<Image> img = Image::fromFile("C:/Users/cs371/Desktop/cs371/1-meshes/journal/test.png", ImageFormat::AUTO());
-  //  makeHeightfield(1.0, 1.0, *img, 10.0);
     makeGUI();
 
 
@@ -121,7 +108,8 @@ void App::onRender() {
     m_rayTracer->traceImage(activeCamera(), m_currentImage);
     timer.tock();
     debugPrintf("%f s\n", timer.elapsedTime());
-    show(m_currentImage,("%f s\n", timer.elapsedTime()));
+    String time(format("%f s \n", timer.elapsedTime()));
+    show(m_currentImage,time);
 };
 
 void App::message(const String& msg) const {

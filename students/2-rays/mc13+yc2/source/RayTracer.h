@@ -31,6 +31,7 @@ protected:
         Calls intersectTriangle()
         Returns nullptr if no intersection is found */
         //shared_ptr<Surfel> intersects( const Ray& ray/*, const TriTree& tris*/) const;
+    shared_ptr<Surfel> intersects(const Ray& ray) const; 
     shared_ptr<Surfel> intersects(const Point3& origin, const Vector3& direction/*, const TriTree& tris*/) const;
 
 
@@ -48,7 +49,7 @@ protected:
     /** Calls L_i()*/
     Radiance3 doIndirectLight(const shared_ptr<Surfel>& surfelX, const Vector3& wo, const Array<shared_ptr<Light>>& lights, int depth) const;
 
-    bool isVisible(const Point3& X, const Point3& Y/*const shared_ptr<Surfel>& surfel, const Point3& X, const Vector3& w_i*/) const;
+    bool isVisible(const Point3& X, const Point3& Y, const Vector3& n) const;
 public:
     RayTracer(const shared_ptr<Scene>& scene, float e);
     /** Driver function to traceOneRay, traces a ray through
