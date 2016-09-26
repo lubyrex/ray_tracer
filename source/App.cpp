@@ -118,7 +118,7 @@ void App::onRender() {
     };
 
     m_film->exposeAndRender(renderDevice, m_debugCamera->filmSettings(), src, settings().hdrFramebuffer.colorGuardBandThickness.x/* + settings().hdrFramebuffer.depthGuardBandThickness.x*/, settings().hdrFramebuffer.depthGuardBandThickness.x, m_result);
-
+    m_result->toImage()->save("result.png"); 
 };
 
 void App::message(const String& msg) const {
