@@ -75,23 +75,36 @@ Measure and graph the running time of the program with respect to the following,
 
 Asymptotic bound
 =======================================================
+A LONG TIME
+
 
 Questions
 =======================================================
 1. How would you derive an analytic intersection algorithm for a finite right cylinder? Do not actually do so.
+First we need to know the center of the bottom side C, the height h, and the normal vector from the bottom side n of the cylinder. Then we construct equations of the infinite cylinder and the two infinite planes that makes up the finite cylinder. Afterwards we check whether `P+tw` intersects the infinite cylinder and planes, after that, we check whether the intersections are actually on the finite cylinder. 
 
-2. How would compute the intersection with a surface for which there was no analytic intersection solution. For example, an arbitrary continuous height function y(x,z)y(x,z). Sketch an algorithm, but do not attempt to refine it.
+2. How would you compute the intersection with a surface for which there was no analytic intersection solution. For example, an arbitrary continuous height function y(x,z). Sketch an algorithm, but do not attempt to refine it.
+
+Let X(a,b,c) be a point, then the equation for the plane would be b=y(a,b). Let P=(d,e,f),w=(g,h,i), then P+tw = (d+tg,e+th,f+ti). Therefore we can construct a function y(d+tg,f+ti)=e+th and calculate the t value.
 
 3. How do you think a binary tree could be leveraged to accelerate the ray intersection process? If you choose to research this (not required) before answering, be sure to cite the resources that you consult.
 
+We can recursively divide the space into two seperate spaces using a plane, ignoring every mesh that is intersected by the plane. Then we can find a mesh that the ray hit, then we recursively obtain all the parent meshes and get the planes that are used to seperate them. If the ray hits the mesh first then hit the plane, we can completely ignore the other side of the plane and discard that side of the binary tree, which would save us a lot of time. 
+Source : Fast Ray Tracing Using K-D Trees by Donal Fussel and K.R.Subramanian
+
 Self-evaluation
 =======================================================
-(placeholder)
+Youle's self evalutation: B+
+coding style: it wasn't the best, some of the codes are messy making the debugging quite difficult, and version control wasn't used to its full potential. However we did use small helper methods to improve the readability of the code.
+workflow: We tried pair programming, but the most difficult part is communication, as it takes up effort and time to explain it to the other person. This becomes increasingly difficult during the debugging process, since everyone has their own way of debugging(trying things out), and it is often quite difficult to explain to others. 
+report: I am confident that our report will be great. Eventhough we put in most of our effort into the lab itself, we still tried to include most things in the report and in our program, and hopefully it will be in depth. 
 
 
-Reflection
+Skills Learned
 =======================================================
-(placeholder)
+Software: We are now much more familiar with using pointers, the member functions of a class and lambda functions. We are also getting better at reading documentations of G3D engine.
+Algorithm: Intersection function, direct and indirect rendering equations. 
+Math: review of vector operations including dot product, cross product, vector movements. 
 
 Workflow
 =======================================================
