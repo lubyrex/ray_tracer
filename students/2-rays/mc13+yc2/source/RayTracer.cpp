@@ -19,9 +19,11 @@ void RayTracer::traceImage(const shared_ptr<Camera>& camera,/* const shared_ptr<
     m_scene->getTypedEntityArray(lights);
 
     if (m_spheresOn) {
-        Point3 center(width, height, -5);
-        shared_ptr<Sphere> blackSphere(new Sphere(center, 0.1));
-        m_mySpheres.append(blackSphere);
+        for(float a(-7.0);a<7.0f;++a){
+        Point3 center(0.0f,0.01f , -a);
+        shared_ptr<Sphere> blackSphere(new Sphere(center,0.2f ));
+        
+        m_mySpheres.append(blackSphere);}
     };
 
     Vector2 dimensions((float)width, (float)height);
@@ -67,8 +69,11 @@ shared_ptr<Surfel> RayTracer::intersects(const Point3& P, const Vector3& w) cons
     float t_s(0);
     float b[3];
     Point3 V[3];
+    Point3 X(0,0,0);
+    Vector3 n(0,0,0);
+    float dTri(inf());
+    float dCir(inf());
 
-    float d(inf());
 
     for (int i(0); i < m_triTree->size(); ++i) {
         Tri tri(m_triTree->operator[](i));
@@ -78,8 +83,8 @@ shared_ptr<Surfel> RayTracer::intersects(const Point3& P, const Vector3& w) cons
 
 
         if (intersectTriangle(P, w, V, b, t_t)) {
-            if (t_t < d) {
-                d = t_t;
+            if (t_t < dTri) {
+                dTri = t_t;
                 hit.distance = t_t;
                 hit.backface = (w.dot(tri.normal(vertexArray)) > 0);
                 hit.triIndex = i;
@@ -95,15 +100,15 @@ shared_ptr<Surfel> RayTracer::intersects(const Point3& P, const Vector3& w) cons
         for (int i(0); i < m_mySpheres.size(); ++i) {
             shared_ptr<Sphere> sphere(m_mySpheres[i]);
             if (intersectSphere(P, w, t_s, sphere, Color3(0, 0, 0))) {
-                if (t_s < d) {
-                    d = t_s;
+                if (t_s < dCir) {
+                    dCir = t_s;
                     X = P + t_s*w;
                     n = (X - sphere->center).direction();
                 };
             };
         };
 
-        if (t_s < t_t) {
+        if (dCir < dTri) {
             shared_ptr<Surfel> toReturn(new UniversalSurfel);
             surfel->lambertianReflectivity = Color3::white();
             surfel->geometricNormal = n;
@@ -114,7 +119,7 @@ shared_ptr<Surfel> RayTracer::intersects(const Point3& P, const Vector3& w) cons
         };
     };
 
-    if (d < inf()) {
+    if (dTri < inf()) {
         return m_triTree->sample(hit);
     }
     else {
@@ -154,16 +159,16 @@ bool RayTracer::intersectTriangle(const Point3& P, const Vector3& w, const Point
 bool RayTracer::intersectSphere(const Point3& P, const Vector3& w, float& t, const shared_ptr<Sphere>& sphere, const Color3& color) const {
     Point3 C(sphere->center);
     float r(sphere->radius);
-    float b = 2.0*w.dot(P - C);
+    float b = 2.0f*w.dot(P - C);
     float c = (P - C).dot(P - C) - r*r;
-    float inRadical = b*b - 4 * c;
+    float inRadical = b*b - 4.0f * c;
 
     if (inRadical < 0 || sphere->contains(P)) {
         return false;
     }
     else {
-        float t_0 = (-b + sqrt(inRadical)) / 2.0;
-        float t_1 = (-b - sqrt(inRadical)) / 2.0;
+        float t_0 = (-b + sqrt(inRadical)) / 2.0f;
+        float t_1 = (-b - sqrt(inRadical)) / 2.0f;
         t = t_0 < t_1 ? t_0 : t_1;
         return true;
     };
