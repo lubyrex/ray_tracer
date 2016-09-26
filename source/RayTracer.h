@@ -31,7 +31,6 @@ protected:
         Calls intersectTriangle()
         Returns nullptr if no intersection is found */
         //shared_ptr<Surfel> intersects( const Ray& ray/*, const TriTree& tris*/) const;
-    shared_ptr<Surfel> intersects(const Ray& ray) const; 
     shared_ptr<Surfel> intersects(const Point3& origin, const Vector3& direction/*, const TriTree& tris*/) const;
 
 

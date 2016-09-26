@@ -39,13 +39,7 @@ void RayTracer::traceImage(const shared_ptr<Camera>& camera,/* const shared_ptr<
         img->set(pixel.x, pixel.y, sum / (float)maxRays);
     }, !m_runConcurrent);
 
-    
-    if (m_result) {
-        m_result->resize(width, height);
-    }
-
-    m_film->exposeAndRender(renderDevice, m_debugCamera->filmSettings(), src, settings().hdrFramebuffer.colorGuardBandThickness.x/* + settings().hdrFramebuffer.depthGuardBandThickness.x*/, settings().hdrFramebuffer.depthGuardBandThickness.x, m_result);
-};
+   };
 
 // Adapted from C++ Direct Illumination [_rn_dirctIllm] from http://graphicscodex.com 
 Radiance3 RayTracer::L_i(const Point3& X, const Vector3& wi, const Array<shared_ptr<Light>>& lights, int numScattering, int depth) const {
