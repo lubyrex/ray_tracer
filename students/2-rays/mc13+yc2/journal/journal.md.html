@@ -60,14 +60,20 @@ Acccomplished:
 
 2016-09-22: Algorithms
 =====================================================================
-Radiance: Lambert's cosine law: observable surface falls with the cosine of the measure of the angle, from the vertical. 
-    - Compute cosine compensation with **dot product**; $a \dot b = ||a||~||b|| cos\theta$, where $\theta$ is the angle between a and b. The compensation factor for measuring away from the normal is given by Lambert's law (the dot product between the unit direction vector, and the normal). 
+ncident light L-i function to call the outgoing light L_o function for each pixel in the image. Both return the radiance value to be assigned to that pixel. L_o performs 
 
-L_i -> if there's an intersecting surfel compute its radiance value
+ \begin{equation} \Lo(X, \wo) = \beta(X, Y) \cdot f_X(\wi, \wo) \cdot |\wi \cdot \n| \end{equation}
 
-L_o -> computes radiance value for surfel -> Emmitted+Direct+Scattered light over all lights in scene. 
+for each light, and returns this value for a surfel only if it's visible from the light.
 
-Indirect scattering computed by do IndirectLight with 1-depth recursion and 3 indirect rays 
+Indirect Light:
+\begin{equation}
+L_\mathrm{reflected~indirect}(X, \wo) = \int_{\mathbf{S}^2_+} \Li^1(X, \wi) \cdot f_X(\wi,\wo) \cdot |\wi \cdot \n| ~ d\wi
+\label{eqn:indirect}
+\end{equation}
+
+, recursing once on L_i. 
+
 
 2016-09-22: Implementation
 =====================================================================

@@ -39,17 +39,18 @@ Results
 
     ![With indirect light](2016-09-26_spheres+triangles.png)
 
-4. 2048 G3D Cornell Box:
+4. 2048 G3D Cornell Box (rendering ran for over 2h50min past the deadline):
 
-    ![]()
+    ![Place Holder - indirect rays first attempt](IndirectLights.jpg)
 
-5. G3D Sponza (Report rendering time):
-                                                                         
-    ![]()
 
-6. Custom Scene:
+5. Custom Scene:
 
     ![With indirect lighting](2016-09-26_DemoScene.png)
+
+
+6. Sponza: 
+    (rendered for over 1h40min, and past deadline
 
 Running time analysis
 =======================================================
@@ -84,17 +85,12 @@ The estimate should be fairly accurate for other variables. Even if our codes ar
 
 Questions
 =======================================================
-1. How would you derive an analytic intersection algorithm for a finite right cylinder? Do not actually do so.
-First we need to know the center of the bottom side C, the height h, and the normal vector from the bottom side n of the cylinder. Then we construct equations of the infinite cylinder and the two infinite planes that makes up the finite cylinder. Afterwards we check whether `P+tw` intersects the infinite cylinder and planes, after that, we check whether the intersections are actually on the finite cylinder. 
+1. First we need to know the center of the bottom side C, the height h, and the normal vector from the bottom side n of the cylinder. Then we construct equations of the infinite cylinder and the two infinite planes that makes up the finite cylinder. Afterwards we check whether `P+tw` intersects the infinite cylinder and planes, after that, we check whether the intersections are actually on the finite cylinder. 
 
-2. How would you compute the intersection with a surface for which there was no analytic intersection solution. For example, an arbitrary continuous height function y(x,z). Sketch an algorithm, but do not attempt to refine it.
+2.Let X(a,b,c) be a point, then the equation for the plane would be b=y(a,b). Let P=(d,e,f),w=(g,h,i), then P+tw = (d+tg,e+th,f+ti). Therefore we can construct a function y(d+tg,f+ti)=e+th and calculate the t value.
 
-Let X(a,b,c) be a point, then the equation for the plane would be b=y(a,b). Let P=(d,e,f),w=(g,h,i), then P+tw = (d+tg,e+th,f+ti). Therefore we can construct a function y(d+tg,f+ti)=e+th and calculate the t value.
-
-3. How do you think a binary tree could be leveraged to accelerate the ray intersection process? If you choose to research this (not required) before answering, be sure to cite the resources that you consult.
-
-We can recursively divide the space into two seperate spaces using a plane, ignoring every mesh that is intersected by the plane. Then we can find a mesh that the ray hit, then we recursively obtain all the parent meshes and get the planes that are used to seperate them. If the ray hits the mesh first then hit the plane, we can completely ignore the other side of the plane and discard that side of the binary tree, which would save us a lot of time. 
-Source : Fast Ray Tracing Using K-D Trees by Donal Fussel and K.R.Subramanian
+3.We can recursively divide the space into two seperate spaces using a plane, ignoring every mesh that is intersected by the plane. Then we can find a mesh that the ray hit, then we recursively obtain all the parent meshes and get the planes that are used to seperate them. If the ray hits the mesh first then hit the plane, we can completely ignore the other side of the plane and discard that side of the binary tree, which would save us a lot of time. 
+    Source : [Fast Ray Tracing Using K-D Trees by Donald Fussel and K.R.Subramanian](https://people.cs.clemson.edu/~dhouse/courses/405/notes/KDtrees-Fussell.pdf)
 
 Self-evaluation
 =======================================================
