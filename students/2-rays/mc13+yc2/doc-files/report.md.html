@@ -8,28 +8,20 @@
                       
 Rendering Algorithms
 =======================================================
-- Important Design decisions: 
-- Observations:
-- "Gotchas":
-
-The reflected radiance at $X$ due to a single, unshadowed point light at $Y$ is given by:
+We defined the incident light L-i function to call the outgoing light L_o function for each pixel in the image. Both return the radiance value to be assigned to that pixel. L_o performs 
 
  \begin{equation} \Lo(X, \wo) = \beta(X, Y) \cdot f_X(\wi, \wo) \cdot |\wi \cdot \n| \end{equation}
 
-where $\beta$ is the biradiance function of the light, $f_X$ is the bidirectional scattering
-distribution function of the surface at $X$, $\wi$ is the unit vector from $X$ towards $Y$, $\wo$
-is the outgoing direction, and $\n$ is the normal to the surface at $X$.
-
-The indirect radiance term is one more iteration of the rendering equation's integral equation
-(for nontransmissive surfaces). The total indirect contribution from one indirect scattering
-event is therefore:
+for each light, and returns this value for a surfel only if it's visible from the light. Realizing that if the object is not visible form a light, there's a shadow over it, was one of our gotcha moments. L_o also calls doIndirectLight, which picks a random direction and performs 
 
 \begin{equation}
 L_\mathrm{reflected~indirect}(X, \wo) = \int_{\mathbf{S}^2_+} \Li^1(X, \wi) \cdot f_X(\wi,\wo) \cdot |\wi \cdot \n| ~ d\wi
 \label{eqn:indirect}
 \end{equation}
 
-where $\Li^1$ is the "one bounce" (i.e., nonrecursive) incident light function.
+, recursing once on L_i. 
+
+Our triangle and sphere intersection functions determine whether or not a surfel should be created, and at which position, for a given ray by transcribing the equations defined in the Ray Casting chapter. 
 
 Results
 =======================================================
@@ -52,7 +44,7 @@ Results
     ![]()
 
 5. G3D Sponza (Report rendering time):
-
+                                                                         
     ![]()
 
 6. Custom Scene:
@@ -98,50 +90,30 @@ Source : Fast Ray Tracing Using K-D Trees by Donal Fussel and K.R.Subramanian
 
 Self-evaluation
 =======================================================
-Youle's self evalutation: B+
-coding style: it wasn't the best, some of the codes are messy making the debugging quite difficult, and version control wasn't used to its full potential. However we did use small helper methods to improve the readability of the code.
-workflow: We tried pair programming, but the most difficult part is communication, as it takes up effort and time to explain it to the other person. This becomes increasingly difficult during the debugging process, since everyone has their own way of debugging(trying things out), and it is often quite difficult to explain to others. 
-report: I am confident that our report will be great. Eventhough we put in most of our effort into the lab itself, we still tried to include most things in the report and in our program, and hopefully it will be in depth. 
+B+
+
+coding style: We tried to make as few copy assignements as possible, and passed all big parameters as constant references. Although we panicked at the onset of lab, which resulted in a messy first draft of working code, we managed to review and abstract our functions in a way that made more sense. 
+
+workflow: It was definitely not the best. At first, we were confused about how to approach this project. We panicked and tried a series of different approaches, until we decided to transcribe the textbook. This set us back greatly. Pair programming was also somewhat challenging because we had to conciliate different ways of debugging, while at the same time trying to communicate clearly. 
+
+report: Our report reflects our results to the best of our ability, and was thought through and reviewed 
 
 
 Skills Learned
 =======================================================
-Software: We are now much more familiar with using pointers, the member functions of a class and lambda functions. We are also getting better at reading documentations of G3D engine.
-Algorithm: Intersection function, direct and indirect rendering equations. 
-Math: review of vector operations including dot product, cross product, vector movements. 
+Software: We are now much more familiar with using pointers, the member functions of a class and lambda functions. We are also getting better at reading documentations of G3D engine, and in using the SVN. 
+
+Algorithm: This project has tauhgt us how to better think about abstracting and defining functions. 
+
+Math: the project provided a review of vector operations including dot product, cross product, vector movements. It also taught us to think about light and rays from a geometric perspective, and how to adapt mathematical perfection to imperfect code. 
 
 Workflow
 =======================================================
- Task                 | Description                                                |Planned Time(h)| Actual Time
- ---------------------|------------------------------------------------------------|--------------:|------------:
- Report Draft         | Formatted Markdeep document with placeholder text.         |     0.50      | 0.50
- GUI MVP    	      |	Copy code from Meshes and add extra specifications link to function |  0.25    | 
- `App::onRender` Draft| skeleteon of procedure, loops, forks, and helper functions linked to the GUI|     0.75      | 
- RayTracer Draft      | Header of class and all it's member functions               |      0.50     |
- Ray intersect Draft  | rough lines of algorithm implementation                     |      0.50     |
- Shading Draft        | Procedure's structure, including inputs and outlining comments|     0.75     | 
- Indirect Rays Draft  | Algorithm's structure and outlining comments                |    0.50       |   
- Ray intersect MVP    | working for all primitives, successfully bumping rays       |      0.50     |
- Shading MVP          | Algorithms working                                          |     0.75      | 
- Indirect Rays MVP    | Algorithms working                                          |    0.50       |    
- RayTracer MVP        | cpp implementation generally working, consistent relationship b/w member functions|      0.75     |
- `App::onRender` MVP  | procedures working preliminarily, maybe with some bugs      |     1.00      | 
- Report MVP           | questions reasoned through and answered                     |     0.50      | 
-Ray intersect MVP    | working for all primitives, successfully bumping rays       |      0.50     |
- Ray intersect Polish | Correctly working for all primitives, with satisfactory ray bumping, and as few as possible precision losses|      0.50     |
- Shading Polish       | Correct, and producing satisfactory results                 |     0.50      | 
- Indirect Rays Polish | Correct, and producing satisfactory results                 |    0.50       |    
- RayTracer Polish     | Implementation working with as few bugs as possible, hopefully no bugs|      0.50     |
- `App::onRender` Polish| Procedures working correctly                               |     0.50      | 
- Report Polish        | Questions reviewed and edited appropriately                 |     0.50      |
-                                                          
-[Table [tbl:workflow]: project planning table.]
+12h mc13+yc2 -> triangle intersection MVP, preliminary shading (almost MVP)
 
-Planned works sessions: 
-    - 9/22: 1-4pm
-    - 9/23: 4-7pm 
-    - 9/24: 2-6pm
-    - 9/25: 2-6:30pm
-    - 9/26: 4-7pm
+6h mc13+yc2 -> restructured shading, indirectRays(mc13) + GUI Draft (by yc2 - untied to App)
+
+8h mc13+yc2 -> tie renderer and GUI (mc13), fix some renderer inconsistencies (mc13), draw analytic spheres (yc2), run tests, get report to MVP. 
+
 <!-- Markdeep: -->
 <style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace;}</style><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
