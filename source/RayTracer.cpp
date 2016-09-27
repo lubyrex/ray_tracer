@@ -185,8 +185,8 @@ Radiance3 RayTracer::L_o(const shared_ptr<Surfel>& surfelX, const Vector3& wo, c
     const Point3& X(surfelX->position);
     const Vector3& n(surfelX->shadingNormal);
 
-    Thread::runConcurrently(Point2int32(0, 0), Point2int32(lights.size(), 1), [&](Point2int32 i) {
-        const shared_ptr<Light>& light(lights[i.x]);
+    Thread::runConcurrently(Point2int32(0, 0), Point2int32(/*lights.size()*/6, 1), [&](Point2int32 i) {
+        const shared_ptr<Light>& light(lights[1]);
         const Point3& Y(light->position().xyz());
 
         if (isVisible(X, Y, surfelX->geometricNormal.direction())) {
