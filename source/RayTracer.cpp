@@ -6,7 +6,7 @@ RayTracer::RayTracer(const shared_ptr<Scene>& s, float e) :
     m_scene(s), m_epsilon(e) {};
 
 
-void RayTracer::traceImage(const shared_ptr<Camera>& camera,/* const shared_ptr<Scene>& m_scene,*/const shared_ptr<Image>& img) {
+void RayTracer::traceImage(const shared_ptr<Camera>& camera, const shared_ptr<Image>& img) {
 
     Array<shared_ptr<Surface>> surfs; // Pass Arrays down 
     m_scene->onPose(surfs);
@@ -31,8 +31,8 @@ void RayTracer::traceImage(const shared_ptr<Camera>& camera,/* const shared_ptr<
         
   };
 
-    Vector2 dimensions((float)width, (float)height);
-    Rect2D plane(dimensions);
+    const Vector2 dimensions((float)width, (float)height);
+    const Rect2D& plane(dimensions);
 
     int maxRays(1);
     Thread::runConcurrently(Point2int32(0, 0), Point2int32(width, height), [&](Point2int32 pixel) {
@@ -40,7 +40,7 @@ void RayTracer::traceImage(const shared_ptr<Camera>& camera,/* const shared_ptr<
         Radiance3 sum(0, 0, 0);
         Thread::runConcurrently(Point2int32(0, 0), Point2int32(1, maxRays), [&](Point2int32 i) {
             ray = ray.bumpedRay(m_epsilon);
-            sum += L_i(ray.origin(), ray.direction(), lights, m_raysPerPixel, 1);
+            sum += L_i(ray.origin(), ray.direction(), lights, 1);
         }, !m_runConcurrent);
 
         img->set(pixel.x, pixel.y, sum / (float)maxRays);
@@ -49,14 +49,14 @@ void RayTracer::traceImage(const shared_ptr<Camera>& camera,/* const shared_ptr<
 };
 
 // Adapted from C++ Direct Illumination [_rn_dirctIllm] from http://graphicscodex.com 
-Radiance3 RayTracer::L_i(const Point3& X, const Vector3& wi, const Array<shared_ptr<Light>>& lights, int numScattering, int depth) const {
+Radiance3 RayTracer::L_i(const Point3& X, const Vector3& wi, const Array<shared_ptr<Light>>& lights, int depth) const {
     // Find the first intersection 
-    shared_ptr<Surfel> surfelY(intersects(X, wi));
+    const shared_ptr<Surfel>& surfelY(intersects(X, wi));
 
     if (notNull(surfelY)) {
         // Compute the light leaving Y, which is the same as
         // the light entering X when the medium is non-absorptive
-        return L_o(surfelY, -wi, lights, numScattering, depth);
+        return L_o(surfelY, -wi, lights, depth);
     }
     else {
         return Radiance3(0, 0, 0);
@@ -64,7 +64,6 @@ Radiance3 RayTracer::L_i(const Point3& X, const Vector3& wi, const Array<shared_
 }
 
 shared_ptr<Surfel> RayTracer::intersects(const Point3& P, const Vector3& w) const {
-    //  return m_triTree->intersectRay(Ray(P,w));
     TriTree::Hit hit;
     shared_ptr<UniversalSurfel> surfel(new UniversalSurfel);
 
@@ -162,7 +161,7 @@ bool RayTracer::intersectTriangle(const Point3& P, const Vector3& w, const Point
 };
 
 bool RayTracer::intersectSphere(const Point3& P, const Vector3& w, float& t, const shared_ptr<Sphere>& sphere, const Color3& color) const {
-    Point3 C(sphere->center);
+    const Point3& C(sphere->center);
     float r(sphere->radius);
     float b (2.0f*w.dot(P - C));
     float c ((P - C).dot(P - C) - r*r);
@@ -180,14 +179,14 @@ bool RayTracer::intersectSphere(const Point3& P, const Vector3& w, float& t, con
 };
 
 // Adapted from C++ Direct Illumination [_rn_dirctIllm] from http://graphicscodex.com 
-Radiance3 RayTracer::L_o(const shared_ptr<Surfel>& surfelX, const Vector3& wo, const Array<shared_ptr<Light>>& lights, int numScattering, int depth) const {
+Radiance3 RayTracer::L_o(const shared_ptr<Surfel>& surfelX, const Vector3& wo, const Array<shared_ptr<Light>>& lights, int depth) const {
     // Begin with the emitted radiance
     Radiance3 L(surfelX->emittedRadiance(wo));
     const Point3& X(surfelX->position);
     const Vector3& n(surfelX->shadingNormal);
 
     Thread::runConcurrently(Point2int32(0, 0), Point2int32(lights.size(), 1), [&](Point2int32 i) {
-        const shared_ptr<Light> light(lights[i.x]);
+        const shared_ptr<Light>& light(lights[i.x]);
         const Point3& Y(light->position().xyz());
 
         if (isVisible(X, Y, surfelX->geometricNormal.direction())) {
@@ -199,12 +198,12 @@ Radiance3 RayTracer::L_o(const shared_ptr<Surfel>& surfelX, const Vector3& wo, c
 
         Radiance3 indirectLight(Radiance3::black());
         if (depth > 0) {
-            Thread::runConcurrently(Point2int32(0, 0), Point2int32(1, numScattering), [&](Point2int32 i) {
+            Thread::runConcurrently(Point2int32(0, 0), Point2int32(1, m_raysPerPixel), [&](Point2int32 i) {
                 indirectLight += doIndirectLight(surfelX, wo, lights, depth);
             }, !m_runConcurrent);
 
-            if (numScattering > 0) {
-                indirectLight /= (float)numScattering;
+            if (m_raysPerPixel > 0) {
+                indirectLight /= (float)m_raysPerPixel;
                 L += indirectLight;
             };
         };
@@ -217,15 +216,15 @@ Radiance3 RayTracer::doIndirectLight(const shared_ptr<Surfel>& surfelX, const Ve
     Radiance3 r(0, 0, 0);
     const Vector3& wi(Vector3::cosHemiRandom(surfelX->shadingNormal, Random::threadCommon()).direction());
     const Color3& f(surfelX->finiteScatteringDensity(wi, wo));
-    r += L_i(surfelX->position, wi, lights, 1, depth - 1)*f;
+    r += L_i(surfelX->position, wi, lights, depth - 1)*f;
     return r;
 };
 
 bool RayTracer::isVisible(const Point3& X, const Point3& Y, const Vector3& n) const {
-    Point3 X_prime(X + n*m_epsilon);
-    Vector3 w_i((X - Y).direction());
-    Point3 origin(Y + m_epsilon*(-1)*w_i);
+    const Point3& X_prime(X + n*m_epsilon);
+    const Vector3& w_i((X - Y).direction());
+    const Point3& origin(Y + m_epsilon*(-1)*w_i);
 
-    shared_ptr<Surfel> intersect(intersects(origin, w_i));
+    const shared_ptr<Surfel>& intersect(intersects(origin, w_i));
     return (intersect != nullptr) && (((intersect->position) - X).length() <= m_epsilon);
 };
