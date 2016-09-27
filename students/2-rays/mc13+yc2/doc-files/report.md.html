@@ -71,7 +71,15 @@ Measure and graph the running time of the program with respect to the following,
 
 Asymptotic bound
 =======================================================
-A LONG TIME
+Number of cores: C
+Number of triangles: T
+Number of pixels: P
+Number of lights: L
+Number of indirect rays: I
+Run time:O(IxLxPxT)/C
+
+This is a bad estiamate for cores, since we know that the cores does not run tasks with multithreads perfectly efficiently, and it varies depending on the different tasks.
+The estimate should be fairly accurate for other variables. Even if our codes are inefficient, it is only going to change the time by a constant factor, it hardly ever affect the run time more than that. However, with higher amount of work, the processors should perform differently, which will vary the run time.
 
 
 Questions
