@@ -107,7 +107,7 @@ void App::onRender() {
     timer.tick();
     m_rayTracer->traceImage(activeCamera(), m_currentImage);
     timer.tock();
-    debugPrintf("%f s\n", timer.elapsedTime());
+    debugPrintf("%f s \n", timer.elapsedTime());
     String time(format("%f s \n", timer.elapsedTime()));
     show(m_currentImage,time);
 

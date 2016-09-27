@@ -28,6 +28,7 @@
     <None Include="data-files\scene\Ornament.Scene.Any" />
     <None Include="data-files\model\cube.off" />
     <None Include="data-files\model\demo.Scene.Any" />
+    <None Include="data-files\scene\demo.Scene.Any" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
