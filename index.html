@@ -1,0 +1,68 @@
+﻿                  <meta charset="utf-8">
+                       **Development Journal**
+                        Lab 2-Rays
+               Matheus de Carvalho Souza  +  Youle Chen 
+               mc13@williams.edu           
+               yc2@williams.edu   
+
+2016-09-21: Advice
+=====================================================================
+- Work evenly divided in 4 parts:
+    1. GUI;
+    2. Ray tracing loop and post-processing the image;
+    3. The actual ray tracing; 
+    4. the ray-primitive intersection routines.
+
+- Ray tracing algorithm takes only a few lines to implement. Design it well
+
+- Allocate time evenly across the 4 parts, and budget debugging, svn, documentation, and final report time
+
+- It takes a long time to render images:
+    1. Debug using small images and simple scenes;
+    2. Anticipate rendering time and plan ahead.
+
+- Main bugs encountered: poorly chosen epsilon values, missing negations on directions. Break points and assertions to question my assumptions about the code. 
+
+2016-09-21: Procedures and helpers
+======================================================================
+1. GUI setup
+    - GApp::drawMessage to show the Rendering message. 
+    - G3D::Stopwatch for computing rendering time. 
+    - (helper) Fetching the resolution from GUI: Vector2int32 App::resolution() const, using G3D::TextInput to parse the selected value in the G3D::GuiDropDownList
+
+2. Render setup
+App::onRender callback function to: 
+2.1. determine the rendering options; 
+2.2. Create the output G3D::Image; 
+2.3. Pose the scene (with GApp::onPose) to extract the G3D::Surfaces (ignored the Surface2Ds produced); 
+2.4. Create an instace of RayTracer and set the scene from GApp::scene;
+2.5. Launch rendering on RayTracer eith the image and GApp::activeCamera, using G3D::Stopwatch for timing;
+2.6. Convert the image to a G3D::Texture and post-process the image with G3D::Film;
+2.7. Display image on screen.
+
+Look into the post-processing code from the cpuRealTimeRayTrace project
+
+3. Ray generation 
+    Ray inersection and ray tracing algorithms into a RayTracer class. RayTracer separates setting the scene from the actual rendering, and contains a large number of small helper routines.
+    Core internal data structures was a G2D::TriTree, used as an array via operator[] overload. 
+    G3D::Scene::onPose and G3D::TriTree::setcontents. Extract all lights from the scene into an array.
+    RayTracer::Options class abstraction (adding fixed primitives, multithreading, etc.)
+
+Single threaded ray tracer example:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ c++
+for (Point2int32 point; point.y < height; ++point.y) {
+    for (point.x = 0; point.x < width; ++point.x) {
+	    ...
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+nice properties: the iteration variable is a 2D point ready for use in the body. loop iterates most tightly along the horizontal axis, which is how images are usually stored on the GPU. This gives good cache coherence and grouping tightly in space (in either x or y) gices good branch coherence.
+
+Multithreaded ray tracer example: Thread::runConcurrently to launcha 2D block:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ c++
+Thread::runConcurrently(Point2int32(0, 0), Point2int32(image->width(), image->height()), ...);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+more efficient than explicitly creating individual threads because runConcurrently optimizes for memory locality and performs load-balancing across processors. You'll need a std::function for the ... portion. I used a C++ lambda expression.
+
+<!-- Markdeep: -->
+<style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace;}</style><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
