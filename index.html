@@ -1,68 +1,143 @@
-﻿                  <meta charset="utf-8">
-                       **Development Journal**
+Skip to content
+This repository
+Search
+Pull requests
+Issues
+Gist
+ @lubyrex
+ Unwatch 1
+  Star 0
+  Fork 0 lubyrex/ray_tracer
+ Code  Issues 0  Pull requests 0  Projects 0  Wiki  Pulse  Graphs  Settings
+Branch: master Find file Copy pathray_tracer/doc-files/report.md.html
+f36bdf7  on Sep 26
+ mc13 No commit message
+0 contributors
+RawBlameHistory     
+125 lines (77 sloc)  6.75 KB
+                  <meta charset="utf-8">
+                      
+                       **Report**
                         Lab 2-Rays
                Matheus de Carvalho Souza  +  Youle Chen 
                mc13@williams.edu           
-               yc2@williams.edu   
+               yc2@williams.edu                  
+                      
+Rendering Algorithms
+=======================================================
+We defined the incident light L-i function to call the outgoing light L_o function for each pixel in the image. Both return the radiance value to be assigned to that pixel. L_o performs 
 
-2016-09-21: Advice
-=====================================================================
-- Work evenly divided in 4 parts:
-    1. GUI;
-    2. Ray tracing loop and post-processing the image;
-    3. The actual ray tracing; 
-    4. the ray-primitive intersection routines.
+ \begin{equation} \Lo(X, \wo) = \beta(X, Y) \cdot f_X(\wi, \wo) \cdot |\wi \cdot \n| \end{equation}
 
-- Ray tracing algorithm takes only a few lines to implement. Design it well
+for each light, and returns this value for a surfel only if it's visible from the light. Realizing that if the object is not visible form a light, there's a shadow over it, was one of our gotcha moments. L_o also calls doIndirectLight, which picks a random direction and performs 
 
-- Allocate time evenly across the 4 parts, and budget debugging, svn, documentation, and final report time
+\begin{equation}
+L_\mathrm{reflected~indirect}(X, \wo) = \int_{\mathbf{S}^2_+} \Li^1(X, \wi) \cdot f_X(\wi,\wo) \cdot |\wi \cdot \n| ~ d\wi
+\label{eqn:indirect}
+\end{equation}
 
-- It takes a long time to render images:
-    1. Debug using small images and simple scenes;
-    2. Anticipate rendering time and plan ahead.
+, recursing once on L_i. 
 
-- Main bugs encountered: poorly chosen epsilon values, missing negations on directions. Break points and assertions to question my assumptions about the code. 
+Our triangle and sphere intersection functions determine whether or not a surfel should be created, and at which position, for a given ray by transcribing the equations defined in the Ray Casting chapter. 
 
-2016-09-21: Procedures and helpers
-======================================================================
-1. GUI setup
-    - GApp::drawMessage to show the Rendering message. 
-    - G3D::Stopwatch for computing rendering time. 
-    - (helper) Fetching the resolution from GUI: Vector2int32 App::resolution() const, using G3D::TextInput to parse the selected value in the G3D::GuiDropDownList
+Results
+=======================================================
+(by rendering with ray tracer at 640x400 resolution, and saving to lossless png file)
 
-2. Render setup
-App::onRender callback function to: 
-2.1. determine the rendering options; 
-2.2. Create the output G3D::Image; 
-2.3. Pose the scene (with GApp::onPose) to extract the G3D::Surfaces (ignored the Surface2Ds produced); 
-2.4. Create an instace of RayTracer and set the scene from GApp::scene;
-2.5. Launch rendering on RayTracer eith the image and GApp::activeCamera, using G3D::Stopwatch for timing;
-2.6. Convert the image to a G3D::Texture and post-process the image with G3D::Film;
-2.7. Display image on screen.
+1. G3D Triangle:
 
-Look into the post-processing code from the cpuRealTimeRayTrace project
+    ![Direct light only](2016-09-26_000_TriangleDLonly.png)
 
-3. Ray generation 
-    Ray inersection and ray tracing algorithms into a RayTracer class. RayTracer separates setting the scene from the actual rendering, and contains a large number of small helper routines.
-    Core internal data structures was a G2D::TriTree, used as an array via operator[] overload. 
-    G3D::Scene::onPose and G3D::TriTree::setcontents. Extract all lights from the scene into an array.
-    RayTracer::Options class abstraction (adding fixed primitives, multithreading, etc.)
+2. G3D Cornell Box:
 
-Single threaded ray tracer example:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ c++
-for (Point2int32 point; point.y < height; ++point.y) {
-    for (point.x = 0; point.x < width; ++point.x) {
-	    ...
-    }
-}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-nice properties: the iteration variable is a 2D point ready for use in the body. loop iterates most tightly along the horizontal axis, which is how images are usually stored on the GPU. This gives good cache coherence and grouping tightly in space (in either x or y) gices good branch coherence.
+    ![Direct light only](2016-09-26_DirectLightCornellBox.png)
 
-Multithreaded ray tracer example: Thread::runConcurrently to launcha 2D block:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ c++
-Thread::runConcurrently(Point2int32(0, 0), Point2int32(image->width(), image->height()), ...);
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-more efficient than explicitly creating individual threads because runConcurrently optimizes for memory locality and performs load-balancing across processors. You'll need a std::function for the ... portion. I used a C++ lambda expression.
+3. Analytic spheres + triangles:
+
+    ![With indirect light](2016-09-26_spheres+triangles.png)
+
+4. 2048 G3D Cornell Box (rendering ran for over 2h50min past the deadline):
+
+    ![Place Holder - 15 indirect rays](2016-09-26_001_indirectRays.png)
+
+
+5. Custom Scene:
+
+    ![With indirect lighting](2016-09-26_DemoScene.png)
+
+
+6. Sponza: 
+    (rendered for over 1h40min, and past deadline
+
+Running time analysis
+=======================================================
+Measure and graph the running time of the program with respect to the following, ensuring other parameters are sufficiently large to ensure low variance.
+1. Number of cores (1 vs 4)
+
+![Cores x Running Time](Cores.png)
+
+2. Number of triangles (use heightfield to vary the number of triangles)
+
+3. Number of pixels
+
+    ![Pixels x Running Time](Pixels.png)
+
+4. Number of lights
+![Lights x Running Time](lights.png)
+
+5. Number of indirect rays 
+
+
+Asymptotic bound
+=======================================================
+Number of cores: C
+Number of triangles: T
+Number of pixels: P
+Number of lights: L
+Number of indirect rays: I
+Run time:O(IxLxPxT)/C
+
+This is a bad estiamate for cores, since we know that the cores does not run tasks with multithreads perfectly efficiently, and it varies depending on the different tasks.
+The estimate should be fairly accurate for other variables. Even if our codes are inefficient, it is only going to change the time by a constant factor, it hardly ever affect the run time more than that. However, with higher amount of work, the processors should perform differently, which will vary the run time.
+
+
+Questions
+=======================================================
+1. First we need to know the center of the bottom side C, the height h, and the normal vector from the bottom side n of the cylinder. Then we construct equations of the infinite cylinder and the two infinite planes that makes up the finite cylinder. Afterwards we check whether `P+tw` intersects the infinite cylinder and planes, after that, we check whether the intersections are actually on the finite cylinder. 
+
+2.Let X(a,b,c) be a point, then the equation for the plane would be b=y(a,b). Let P=(d,e,f),w=(g,h,i), then P+tw = (d+tg,e+th,f+ti). Therefore we can construct a function y(d+tg,f+ti)=e+th and calculate the t value.
+
+3.We can recursively divide the space into two seperate spaces using a plane, ignoring every mesh that is intersected by the plane. Then we can find a mesh that the ray hit, then we recursively obtain all the parent meshes and get the planes that are used to seperate them. If the ray hits the mesh first then hit the plane, we can completely ignore the other side of the plane and discard that side of the binary tree, which would save us a lot of time. 
+    Source : [Fast Ray Tracing Using K-D Trees by Donald Fussel and K.R.Subramanian](https://people.cs.clemson.edu/~dhouse/courses/405/notes/KDtrees-Fussell.pdf)
+
+Self-evaluation
+=======================================================
+B+
+
+coding style: We tried to make as few copy assignements as possible, and passed all big parameters as constant references. Although we panicked at the onset of lab, which resulted in a messy first draft of working code, we managed to review and abstract our functions in a way that made more sense. 
+
+workflow: It was definitely not the best. At first, we were confused about how to approach this project. We panicked and tried a series of different approaches, until we decided to transcribe the textbook. This set us back greatly. Pair programming was also somewhat challenging because we had to conciliate different ways of debugging, while at the same time trying to communicate clearly. 
+
+report: Our report reflects our results to the best of our ability, and was thought through and reviewed 
+
+
+Skills Learned
+=======================================================
+Software: We are now much more familiar with using pointers, the member functions of a class and lambda functions. We are also getting better at reading documentations of G3D engine, and in using the SVN. 
+
+Algorithm: This project has tauhgt us how to better think about abstracting and defining functions. 
+
+Math: the project provided a review of vector operations including dot product, cross product, vector movements. It also taught us to think about light and rays from a geometric perspective, and how to adapt mathematical perfection to imperfect code. 
+
+Workflow
+=======================================================
+12h mc13+yc2 -> triangle intersection MVP, preliminary shading (almost MVP)
+
+6h mc13+yc2 -> restructured shading, indirectRays(mc13) + GUI Draft (by yc2 - untied to App)
+
+8h mc13+yc2 -> tie renderer and GUI (mc13), fix some renderer inconsistencies (mc13), draw analytic spheres (yc2), run tests, get report to MVP. 
 
 <!-- Markdeep: -->
 <style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace;}</style><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+Contact GitHub API Training Shop Blog About
+© 2016 GitHub, Inc. Terms Privacy Security Status Help
